@@ -551,9 +551,8 @@ form#rsvp-form{
 <button id="music-toggle" aria-label="Play music">
   <svg id="music-icon" viewBox="0 0 24 24" fill="currentColor"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>
 </button>
-<audio id="bgm" loop preload="none">
-  <!-- Add your own royalty-free instrumental music file here, e.g.: -->
-  <!-- <source src="instrumental-music.mp3" type="audio/mpeg"> -->
+<audio id="bgm" loop preload="auto">
+  <source src="audio/backsound.mp3" type="audio/mpeg">
 </audio>
 
 <!-- ============ LOADING ============ -->
@@ -870,28 +869,30 @@ form#rsvp-form{
         </div>
       </div>
 
-      <div class="f-group">
-        <label class="f-label">Dress Size</label>
-        <div class="pill-row" id="size-row">
-          <label class="pill"><input type="radio" name="ukuran" value="S" required><span>S</span></label>
-          <label class="pill"><input type="radio" name="ukuran" value="M"><span>M</span></label>
-          <label class="pill"><input type="radio" name="ukuran" value="L"><span>L</span></label>
-          <label class="pill"><input type="radio" name="ukuran" value="XL"><span>XL</span></label>
-          <label class="pill"><input type="radio" name="ukuran" value="Custom"><span>Custom</span></label>
+      <div id="attending-only-fields">
+        <div class="f-group">
+          <label class="f-label">Dress Size</label>
+          <div class="pill-row" id="size-row">
+            <label class="pill"><input type="radio" name="ukuran" value="S" required><span>S</span></label>
+            <label class="pill"><input type="radio" name="ukuran" value="M"><span>M</span></label>
+            <label class="pill"><input type="radio" name="ukuran" value="L"><span>L</span></label>
+            <label class="pill"><input type="radio" name="ukuran" value="XL"><span>XL</span></label>
+            <label class="pill"><input type="radio" name="ukuran" value="Custom"><span>Custom</span></label>
+          </div>
+          <div id="custom-size-fields">
+            <div class="f-group"><label class="f-label">Bust/Chest (cm)</label><input type="text" inputmode="numeric" id="f-dada"></div>
+            <div class="f-group"><label class="f-label">Waist (cm)</label><input type="text" inputmode="numeric" id="f-pinggang"></div>
+            <div class="f-group"><label class="f-label">Hips (cm)</label><input type="text" inputmode="numeric" id="f-pinggul"></div>
+            <div class="f-group"><label class="f-label">Height (cm)</label><input type="text" inputmode="numeric" id="f-tinggi"></div>
+          </div>
         </div>
-        <div id="custom-size-fields">
-          <div class="f-group"><label class="f-label">Bust/Chest (cm)</label><input type="text" inputmode="numeric" id="f-dada"></div>
-          <div class="f-group"><label class="f-label">Waist (cm)</label><input type="text" inputmode="numeric" id="f-pinggang"></div>
-          <div class="f-group"><label class="f-label">Hips (cm)</label><input type="text" inputmode="numeric" id="f-pinggul"></div>
-          <div class="f-group"><label class="f-label">Height (cm)</label><input type="text" inputmode="numeric" id="f-tinggi"></div>
-        </div>
-      </div>
 
-      <div class="f-group">
-        <label class="f-label">Wearing Hijab?</label>
-        <div class="pill-row">
-          <label class="pill"><input type="radio" name="hijab" value="Yes" required><span>Yes</span></label>
-          <label class="pill"><input type="radio" name="hijab" value="No"><span>No</span></label>
+        <div class="f-group">
+          <label class="f-label">Wearing Hijab?</label>
+          <div class="pill-row">
+            <label class="pill"><input type="radio" name="hijab" value="Yes" required><span>Yes</span></label>
+            <label class="pill"><input type="radio" name="hijab" value="No"><span>No</span></label>
+          </div>
         </div>
       </div>
 
@@ -1227,14 +1228,26 @@ const bgm = document.getElementById('bgm');
 const musicBtn = document.getElementById('music-toggle');
 const musicIcon = document.getElementById('music-icon');
 let playing = false;
+let autoplayAttempted = false;
+
+function setPlaying(state){
+  playing = state;
+  musicIcon.classList.toggle('spin', state);
+}
+
+function tryAutoplay(){
+  if(autoplayAttempted || playing) return;
+  autoplayAttempted = true;
+  bgm.play().then(()=> setPlaying(true)).catch(()=>{ autoplayAttempted = false; });
+}
+
+window.addEventListener('load', tryAutoplay);
+document.addEventListener('click', tryAutoplay, {once:true});
+document.addEventListener('touchstart', tryAutoplay, {once:true, passive:true});
+
 musicBtn.addEventListener('click', ()=>{
-  if(!bgm.querySelector('source')){
-    showToast('Add your favorite music file in the code! 🎵');
-    return;
-  }
-  if(playing){ bgm.pause(); musicIcon.classList.remove('spin'); }
-  else { bgm.play().catch(()=>{}); musicIcon.classList.add('spin'); }
-  playing = !playing;
+  if(playing){ bgm.pause(); setPlaying(false); }
+  else{ bgm.play().then(()=> setPlaying(true)).catch(()=>{}); }
 });
 
 /* ================= THE QUESTION ================= */
@@ -1267,6 +1280,21 @@ document.querySelectorAll('input[name=ukuran]').forEach(r=>{
   });
 });
 
+const attendingOnly = document.getElementById('attending-only-fields');
+const attendingOnlyRadios = attendingOnly.querySelectorAll('input[required]');
+document.querySelectorAll('input[name=konfirmasi]').forEach(r=>{
+  r.addEventListener('change', ()=>{
+    if(!r.checked) return;
+    const isAttending = r.value === 'Attending';
+    attendingOnly.style.display = isAttending ? '' : 'none';
+    attendingOnlyRadios.forEach(field=> field.required = isAttending);
+    if(!isAttending){
+      document.querySelectorAll('input[name=ukuran]:checked, input[name=hijab]:checked').forEach(f=> f.checked = false);
+      document.getElementById('custom-size-fields').classList.remove('show');
+    }
+  });
+});
+
 document.getElementById('rsvp-form').addEventListener('submit', (e)=>{
   e.preventDefault();
   const data = {
@@ -1287,6 +1315,20 @@ document.getElementById('rsvp-form').addEventListener('submit', (e)=>{
   const list = JSON.parse(localStorage.getItem('bridesmaid_rsvp') || '[]');
   list.push(data);
   localStorage.setItem('bridesmaid_rsvp', JSON.stringify(list));
+
+  const waLines = [
+    'Hi! I would like to confirm my attendance:',
+    '',
+    'Name: ' + (data.nama || '-'),
+    'Attendance: ' + (data.konfirmasi || '-'),
+    'Dress Size: ' + (data.ukuran || '-') + (data.ukuran === 'Custom' ? ' (Bust:' + (data.dada||'-') + ' Waist:' + (data.pinggang||'-') + ' Hips:' + (data.pinggul||'-') + ' Height:' + (data.tinggi||'-') + ')' : ''),
+    'Hijab: ' + (data.hijab || '-'),
+    'WhatsApp: ' + (data.wa || '-'),
+    'Notes: ' + (data.catatan || '-'),
+    'Message: ' + (data.ucapan || '-')
+  ];
+  const waText = encodeURIComponent(waLines.join('\n'));
+  window.open('https://wa.me/6289659050130?text=' + waText, '_blank');
 
   confettiBurst();
   showToast('Thank you! Your confirmation has been saved 💛');
