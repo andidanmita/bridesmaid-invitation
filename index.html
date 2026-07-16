@@ -708,7 +708,7 @@ form#rsvp-form{
             <div class="ic"><img src="icons/pin_map.png" alt=""></div>
             <div><div class="label">Location</div><div class="val">Gedung Mayang Arum, Pasirjambu</div></div>
           </div>
-          <div class="detail-actions">
+          <div class="detail-actions reveal-line">
             <a class="btn" href="https://www.google.com/maps/search/?api=1&query=Gedung%20Mayang%20Arum%20Pasirjambu" target="_blank" rel="noopener">Open Google Maps</a>
           </div>
         </div>
@@ -745,7 +745,7 @@ form#rsvp-form{
       <div class="eyebrow">For My Best Friend</div>
       <h2>Friendship</h2>
     </div>
-    <div class="scroll-gallery">
+    <div class="scroll-gallery reveal-line">
       <div class="columns-wrapper">
         <div class="image-column">
           <div class="track up">
@@ -1013,8 +1013,8 @@ form#rsvp-form{
       <div class="eyebrow">With Love</div>
       <h2>Thank You</h2>
       <p>You just made our day even more special. See you at our happy day.</p>
-      <div class="datebox">25 August 2026 ❤️</div>
-      <div class="mono-small">A &amp; M</div>
+      <div class="datebox reveal-line">25 August 2026 ❤️</div>
+      <div class="mono-small reveal-line">A &amp; M</div>
     </div>
   </section>
 
@@ -1234,6 +1234,14 @@ if(REDUCE_MOTION){
   document.querySelectorAll('.reveal-line').forEach(el=> el.classList.add('in'));
 } else {
   document.querySelectorAll('.slide').forEach(initSectionReveal);
+
+  /* subtle scroll-linked parallax drift on the Wedding Details photo —
+     kept to a single, safe target that has no other GSAP/CSS transform
+     of its own, so it can't fight the reveal-line or d-hero styling */
+  gsap.fromTo('.arch-frame', {y:-20}, {
+    y:20, ease:'none',
+    scrollTrigger:{ trigger:'#detail', scroller:scroller, start:'top bottom', end:'bottom top', scrub:true }
+  });
 }
 
 /* ================= AMBIENT BACKGROUND (Wedding Details onward) ================= */
