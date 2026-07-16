@@ -1262,11 +1262,17 @@ setTimeout(()=>{
 }, 6000);
 
 /* ================= NAV BUTTONS ================= */
+/* scroller.scrollTo (not element.scrollIntoView) — more reliable across
+   Android WebViews when the scrolling element isn't the window itself */
+function scrollToSection(id){
+  const el = document.getElementById(id);
+  if(el) scroller.scrollTo({top: el.offsetTop, behavior:'smooth'});
+}
 document.getElementById('open-invite').addEventListener('click', ()=>{
-  document.getElementById('reveal').scrollIntoView({behavior:'smooth'});
+  scrollToSection('reveal');
 });
 document.getElementById('to-form').addEventListener('click', ()=>{
-  document.getElementById('form-section').scrollIntoView({behavior:'smooth'});
+  scrollToSection('form-section');
 });
 
 /* ================= COUNTDOWN ================= */
@@ -1470,7 +1476,7 @@ document.getElementById('rsvp-form').addEventListener('submit', (e)=>{
   confettiBurst();
   showToast('Thank you! Your confirmation has been saved 💛');
   setTimeout(()=>{
-    document.getElementById('thankyou').scrollIntoView({behavior:'smooth'});
+    scrollToSection('thankyou');
   }, 700);
 });
 
