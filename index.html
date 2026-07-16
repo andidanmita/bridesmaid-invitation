@@ -908,11 +908,6 @@ form#rsvp-form{
       </div>
 
       <div class="f-group">
-        <label class="f-label">WhatsApp Number</label>
-        <input type="tel" id="f-wa" required placeholder="08xxxxxxxxxx">
-      </div>
-
-      <div class="f-group">
         <label class="f-label">Notes (optional)</label>
         <input type="text" id="f-catatan" placeholder="Allergies, special needs, etc.">
       </div>
@@ -964,7 +959,7 @@ form#rsvp-form{
     <div style="overflow-x:auto;">
       <table id="admin-table">
         <thead><tr>
-          <th>Name</th><th>Status</th><th>Size</th><th>Hijab</th><th>WA</th><th>Notes</th><th>Message</th>
+          <th>Name</th><th>Status</th><th>Size</th><th>Hijab</th><th>Notes</th><th>Message</th>
         </tr></thead>
         <tbody></tbody>
       </table>
@@ -1338,7 +1333,6 @@ document.getElementById('rsvp-form').addEventListener('submit', (e)=>{
     pinggul: document.getElementById('f-pinggul').value,
     tinggi: document.getElementById('f-tinggi').value,
     hijab: (document.querySelector('input[name=hijab]:checked')||{}).value || '',
-    wa: document.getElementById('f-wa').value,
     catatan: document.getElementById('f-catatan').value,
     ucapan: document.getElementById('f-ucapan').value,
     waktu: new Date().toLocaleString('en-US')
@@ -1354,7 +1348,6 @@ document.getElementById('rsvp-form').addEventListener('submit', (e)=>{
     'Attendance: ' + (data.konfirmasi || '-'),
     'Dress Size: ' + (data.ukuran || '-') + (data.ukuran === 'Custom' ? ' (Bust:' + (data.dada||'-') + ' Waist:' + (data.pinggang||'-') + ' Hips:' + (data.pinggul||'-') + ' Height:' + (data.tinggi||'-') + ')' : ''),
     'Hijab: ' + (data.hijab || '-'),
-    'WhatsApp: ' + (data.wa || '-'),
     'Notes: ' + (data.catatan || '-'),
     'Message: ' + (data.ucapan || '-')
   ];
@@ -1397,15 +1390,14 @@ function showToast(msg){
       <td>${x.konfirmasi||'-'}</td>
       <td>${x.ukuran||'-'}${x.ukuran==='Custom' ? ` (Bust:${x.dada||'-'} Waist:${x.pinggang||'-'} Hips:${x.pinggul||'-'} Height:${x.tinggi||'-'})` : ''}</td>
       <td>${x.hijab||'-'}</td>
-      <td>${x.wa||'-'}</td>
       <td>${x.catatan||'-'}</td>
       <td>${x.ucapan||'-'}</td>
     </tr>
   `).join('');
 
   document.getElementById('export-csv').addEventListener('click', ()=>{
-    const headers = ['Name','Status','Size','Bust/Chest','Waist','Hips','Height','Hijab','WA','Notes','Message','Submitted At'];
-    const rows = list.map(x=>[x.nama,x.konfirmasi,x.ukuran,x.dada,x.pinggang,x.pinggul,x.tinggi,x.hijab,x.wa,x.catatan,x.ucapan,x.waktu]);
+    const headers = ['Name','Status','Size','Bust/Chest','Waist','Hips','Height','Hijab','Notes','Message','Submitted At'];
+    const rows = list.map(x=>[x.nama,x.konfirmasi,x.ukuran,x.dada,x.pinggang,x.pinggul,x.tinggi,x.hijab,x.catatan,x.ucapan,x.waktu]);
     let csv = headers.join(',') + '\n' + rows.map(r=> r.map(v=>`"${String(v||'').replace(/"/g,'""')}"`).join(',')).join('\n');
     const blob = new Blob(["\uFEFF"+csv], {type:'text/csv;charset=utf-8;'});
     const link = document.createElement('a');
