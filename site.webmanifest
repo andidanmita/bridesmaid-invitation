@@ -1,0 +1,11 @@
+{
+  "name": "Will You Be My Bridesmaid? — Andi & Mita",
+  "short_name": "Bridesmaid",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#F8F1EA",
+  "theme_color": "#4A241C",
+  "icons": [
+    { "src": "icon.png", "sizes": "1024x1024", "type": "image/png" }
+  ]
+}
