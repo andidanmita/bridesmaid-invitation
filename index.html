@@ -63,7 +63,9 @@ button{font-family:inherit;}
   overflow-y:auto;
   overflow-x:hidden;
   scroll-snap-type:y mandatory;
+  overflow-anchor:none;
 }
+.slide{overflow-anchor:none;}
 .slide{
   min-height:100vh;
   min-height:100dvh;
@@ -1271,11 +1273,25 @@ musicBtn.addEventListener('click', ()=>{
 
 /* ================= THE QUESTION ================= */
 let skipRsvpForm = false;
+/* guard against mobile browsers' scroll-anchoring jumping to a
+   neighboring section when this section's height changes suddenly */
+function holdScrollPosition(sectionId){
+  const section = document.getElementById(sectionId);
+  const before = section.getBoundingClientRect().top;
+  requestAnimationFrame(()=>{
+    requestAnimationFrame(()=>{
+      const drift = section.getBoundingClientRect().top - before;
+      if(Math.abs(drift) > 1) scroller.scrollTop += drift;
+    });
+  });
+}
+
 document.getElementById('btn-yes').addEventListener('click', ()=>{
   confettiBurst();
   document.getElementById('letter-wrap').classList.add('show');
   document.getElementById('btn-yes').style.display='none';
   document.getElementById('btn-maybe').style.display='none';
+  holdScrollPosition('question');
 });
 document.getElementById('btn-maybe').addEventListener('click', ()=>{
   skipRsvpForm = true;
@@ -1286,6 +1302,7 @@ document.getElementById('btn-maybe').addEventListener('click', ()=>{
   document.getElementById('letter-wrap').classList.add('show');
   document.getElementById('btn-yes').style.display='none';
   document.getElementById('btn-maybe').style.display='none';
+  holdScrollPosition('question');
   setTimeout(()=>{
     document.getElementById('thankyou').scrollIntoView({behavior:'smooth'});
   }, 2200);
