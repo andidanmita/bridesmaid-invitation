@@ -121,6 +121,25 @@ button{font-family:inherit;}
 }
 @media (hover:none){ #cursor-glow{display:none;} }
 
+/* ambient parallax photo backdrop (visible from Wedding Details onward) */
+#bg-parallax{
+  position:fixed;inset:0;
+  display:flex;gap:clamp(6px,1.6vw,10px);justify-content:center;
+  opacity:0;transition:opacity 1.4s var(--ease-expo);
+  pointer-events:none;overflow:hidden;
+}
+#bg-parallax.visible{opacity:.14;}
+.bgp-col{flex:1 1 0;max-width:220px;overflow:hidden;height:100%;}
+.bgp-track{display:flex;flex-direction:column;will-change:transform;animation-play-state:paused;}
+#bg-parallax.visible .bgp-track{animation-play-state:running;}
+.bgp-track img{
+  width:100%;height:clamp(140px,26vw,220px);object-fit:cover;display:block;
+  filter:grayscale(1);flex:none;
+}
+.bgp-track.up{animation:scrollUp 46s linear infinite;}
+.bgp-track.down{animation:scrollDown 46s linear infinite;}
+@media (max-width:640px){ .bgp-col:nth-child(4){display:none;} }
+
 /* music toggle */
 #music-toggle{
   position:fixed;bottom:18px;right:14px;z-index:60;
@@ -304,7 +323,7 @@ h1.is-split,h2.is-split,
 }
 
 /* ===================== DETAIL ===================== */
-#detail{background:var(--ivory);padding:clamp(20px,5vh,90px) 20px;}
+#detail{background:rgba(251,245,236,.9);padding:clamp(20px,5vh,90px) 20px;}
 #detail .wrap{
   max-width:920px;width:100%;margin:0 auto;
   display:grid;grid-template-columns:1fr 1.1fr;gap:clamp(16px,4vh,60px);align-items:center;
@@ -347,7 +366,7 @@ h1.is-split,h2.is-split,
 #countdown .cd-label{font-size:.6rem;letter-spacing:.15em;text-transform:uppercase;opacity:.7;}
 
 /* ===================== JOURNEY ===================== */
-#journey{background:var(--mahogany-950);padding:clamp(24px,6vh,90px) 0;flex-direction:column;}
+#journey{background:rgba(36,18,16,.9);padding:clamp(24px,6vh,90px) 0;flex-direction:column;}
 #journey .head{text-align:center;color:var(--ivory);padding:0 24px;max-width:640px;margin:0 auto clamp(14px,3vh,44px);}
 #journey .eyebrow{color:var(--blush);}
 #journey h2{font-size:clamp(1.4rem,4vw,2.6rem);color:var(--cream);margin:8px 0 12px;}
@@ -393,7 +412,7 @@ h1.is-split,h2.is-split,
 }
 
 /* ===================== FRIENDSHIP ===================== */
-#friendship{background:#F8F1EA;padding:clamp(24px,6vh,80px) 0;flex-direction:column;overflow:hidden;}
+#friendship{background:rgba(248,241,234,.9);padding:clamp(24px,6vh,80px) 0;flex-direction:column;overflow:hidden;}
 #friendship .head{text-align:center;max-width:600px;margin:0 auto clamp(16px,3.5vh,40px);padding:0 20px;}
 #friendship .eyebrow{color:var(--mahogany-600);}
 #friendship h2{font-size:clamp(1.4rem,3.6vw,2.4rem);color:var(--mahogany-950);margin:10px 0;}
@@ -437,7 +456,7 @@ h1.is-split,h2.is-split,
 }
 
 /* ===================== QUESTION ===================== */
-#question{background:var(--ivory);flex-direction:column;text-align:center;padding:clamp(20px,5vh,40px) 24px;}
+#question{background:rgba(251,245,236,.9);flex-direction:column;text-align:center;padding:clamp(20px,5vh,40px) 24px;}
 #question .content{max-width:600px;}
 #question .l1{
   font-family:'Cormorant Garamond',serif;font-style:italic;font-size:clamp(1.1rem,2.6vw,1.5rem);
@@ -468,7 +487,7 @@ h1.is-split,h2.is-split,
 .envelope::before{content:'✉';position:absolute;top:-16px;left:50%;transform:translateX(-50%);font-size:1.4rem;color:var(--gold);background:var(--ivory);width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;}
 
 /* ===================== FORM ===================== */
-#form-section{background:var(--mahogany-950);padding:clamp(24px,6vh,90px) 20px;flex-direction:column;}
+#form-section{background:rgba(36,18,16,.9);padding:clamp(24px,6vh,90px) 20px;flex-direction:column;}
 #form-section .head{text-align:center;color:var(--ivory);max-width:520px;margin:0 auto clamp(12px,3vh,40px);}
 #form-section .eyebrow{color:var(--blush);}
 #form-section h2{font-size:clamp(1.3rem,3.6vw,2.3rem);color:var(--cream);margin:8px 0;}
@@ -510,7 +529,7 @@ form#rsvp-form{
 .f-hint{font-size:.72rem;color:var(--mahogany-600);opacity:.8;margin-top:6px;}
 
 /* ===================== THANK YOU ===================== */
-#thankyou{background:var(--ivory);flex-direction:column;text-align:center;padding:clamp(20px,5vh,40px) 24px;}
+#thankyou{background:rgba(251,245,236,.9);flex-direction:column;text-align:center;padding:clamp(20px,5vh,40px) 24px;}
 #thankyou .eyebrow{color:var(--mahogany-600);}
 #thankyou h2{font-size:clamp(1.7rem,5vw,3rem);color:var(--mahogany-950);margin:clamp(8px,1.8vh,14px) 0 clamp(8px,1.8vh,16px);}
 #thankyou p{font-family:'Cormorant Garamond',serif;font-style:italic;font-size:1.2rem;color:var(--mahogany-800);max-width:420px;margin:0 auto 8px;line-height:1.7;}
@@ -559,6 +578,68 @@ form#rsvp-form{
 <div id="progress"></div>
 <canvas id="petals"></canvas>
 <div id="cursor-glow"></div>
+<div id="bg-parallax" aria-hidden="true">
+  <div class="bgp-col"><div class="bgp-track up">
+    <img src="images/catin/catin_1.jpeg" alt="" loading="lazy">
+    <img src="images/catin/catin_2.jpeg" alt="" loading="lazy">
+    <img src="images/catin/catin_3.jpeg" alt="" loading="lazy">
+    <img src="images/catin/catin_4.jpeg" alt="" loading="lazy">
+    <img src="images/catin/catin_5.jpeg" alt="" loading="lazy">
+    <img src="images/catin/catin_6.jpeg" alt="" loading="lazy">
+    <img src="images/catin/catin_7.jpeg" alt="" loading="lazy">
+    <img src="images/catin/catin_1.jpeg" alt="" loading="lazy">
+    <img src="images/catin/catin_2.jpeg" alt="" loading="lazy">
+    <img src="images/catin/catin_3.jpeg" alt="" loading="lazy">
+    <img src="images/catin/catin_4.jpeg" alt="" loading="lazy">
+    <img src="images/catin/catin_5.jpeg" alt="" loading="lazy">
+    <img src="images/catin/catin_6.jpeg" alt="" loading="lazy">
+    <img src="images/catin/catin_7.jpeg" alt="" loading="lazy">
+  </div></div>
+  <div class="bgp-col"><div class="bgp-track down">
+    <img src="images/catin/catin_8.jpeg" alt="" loading="lazy">
+    <img src="images/catin/catin_9.jpeg" alt="" loading="lazy">
+    <img src="images/catin/catin_10.jpeg" alt="" loading="lazy">
+    <img src="images/catin/catin_11.jpeg" alt="" loading="lazy">
+    <img src="images/catin/catin_12.jpeg" alt="" loading="lazy">
+    <img src="images/catin/catin_13.jpeg" alt="" loading="lazy">
+    <img src="images/catin/catin_14.jpeg" alt="" loading="lazy">
+    <img src="images/catin/catin_8.jpeg" alt="" loading="lazy">
+    <img src="images/catin/catin_9.jpeg" alt="" loading="lazy">
+    <img src="images/catin/catin_10.jpeg" alt="" loading="lazy">
+    <img src="images/catin/catin_11.jpeg" alt="" loading="lazy">
+    <img src="images/catin/catin_12.jpeg" alt="" loading="lazy">
+    <img src="images/catin/catin_13.jpeg" alt="" loading="lazy">
+    <img src="images/catin/catin_14.jpeg" alt="" loading="lazy">
+  </div></div>
+  <div class="bgp-col"><div class="bgp-track up">
+    <img src="images/catin/catin_15.jpeg" alt="" loading="lazy">
+    <img src="images/catin/catin_16.jpeg" alt="" loading="lazy">
+    <img src="images/catin/catin_17.jpeg" alt="" loading="lazy">
+    <img src="images/catin/catin_18.jpeg" alt="" loading="lazy">
+    <img src="images/catin/catin_19.jpeg" alt="" loading="lazy">
+    <img src="images/catin/catin_20.jpeg" alt="" loading="lazy">
+    <img src="images/catin/catin_15.jpeg" alt="" loading="lazy">
+    <img src="images/catin/catin_16.jpeg" alt="" loading="lazy">
+    <img src="images/catin/catin_17.jpeg" alt="" loading="lazy">
+    <img src="images/catin/catin_18.jpeg" alt="" loading="lazy">
+    <img src="images/catin/catin_19.jpeg" alt="" loading="lazy">
+    <img src="images/catin/catin_20.jpeg" alt="" loading="lazy">
+  </div></div>
+  <div class="bgp-col"><div class="bgp-track down">
+    <img src="images/catin/catin_21.jpeg" alt="" loading="lazy">
+    <img src="images/catin/catin_22.jpeg" alt="" loading="lazy">
+    <img src="images/catin/catin_23.jpeg" alt="" loading="lazy">
+    <img src="images/catin/catin_24.jpeg" alt="" loading="lazy">
+    <img src="images/catin/catin_25.jpeg" alt="" loading="lazy">
+    <img src="images/catin/catin_26.jpeg" alt="" loading="lazy">
+    <img src="images/catin/catin_21.jpeg" alt="" loading="lazy">
+    <img src="images/catin/catin_22.jpeg" alt="" loading="lazy">
+    <img src="images/catin/catin_23.jpeg" alt="" loading="lazy">
+    <img src="images/catin/catin_24.jpeg" alt="" loading="lazy">
+    <img src="images/catin/catin_25.jpeg" alt="" loading="lazy">
+    <img src="images/catin/catin_26.jpeg" alt="" loading="lazy">
+  </div></div>
+</div>
 
 <button id="music-toggle" aria-label="Play music">
   <img id="music-icon" src="icons/disk_pause.png" alt="">
@@ -853,7 +934,7 @@ form#rsvp-form{
         </div>
         <div class="envelope" id="envelope-maybe" style="display:none">
           <p style="margin:0 0 10px">Dear <span class="guest-name">My Bestie</span>,</p>
-          <p style="margin:0">Thank you for letting me know. Whatever you decide, it means a lot just to have you in my life 💛<br>— Andi &amp; Mita</p>
+          <p style="margin:0">Thank you for letting me know. Whatever you decide, it means a lot just to have you in my life. Feel free to share your answer in the form below 💛<br>— Andi &amp; Mita</p>
         </div>
         <div class="submit-row" style="margin-top:24px;">
           <button class="btn" id="to-form" style="border-color:var(--mahogany-800);color:var(--mahogany-800)">Continue to Form →</button>
@@ -1088,10 +1169,18 @@ window.addEventListener('load', ()=>{
       loadingEl.classList.add('hide');
       tryAutoplay();
       playOpening();
+      setTimeout(()=> ScrollTrigger.refresh(), 300);
     };
     loadingEl.addEventListener('click', dismiss, {once:true});
     setTimeout(dismiss, 5000); // safety net in case the tap never happens
   }, 2000);
+});
+
+/* lazy-loaded images can change document height after ScrollTrigger's
+   initial measurement; refresh once things settle so trigger positions
+   (e.g. the ambient background) stay accurate */
+window.addEventListener('load', ()=>{
+  setTimeout(()=> ScrollTrigger.refresh(), 2500);
 });
 
 /* ================= SCROLL PROGRESS ================= */
@@ -1147,6 +1236,21 @@ if(REDUCE_MOTION){
   document.querySelectorAll('.slide').forEach(initSectionReveal);
 }
 
+/* ================= AMBIENT BACKGROUND (Wedding Details onward) ================= */
+(function(){
+  const bgParallax = document.getElementById('bg-parallax');
+  const bgStart = document.getElementById('detail');
+  const bgEnd = document.getElementById('thankyou');
+  if(!bgParallax || !bgStart || !bgEnd) return;
+  ScrollTrigger.create({
+    trigger: bgStart,
+    endTrigger: bgEnd,
+    start: 'top 85%',
+    end: 'bottom bottom',
+    onToggle: (self)=> bgParallax.classList.toggle('visible', self.isActive)
+  });
+})();
+
 /* Safety net: if for any reason a section's lines never got revealed
    (e.g. unusual viewport/browser edge case), force them visible after 6s
    so no content stays permanently hidden. */
@@ -1162,8 +1266,7 @@ document.getElementById('open-invite').addEventListener('click', ()=>{
   document.getElementById('reveal').scrollIntoView({behavior:'smooth'});
 });
 document.getElementById('to-form').addEventListener('click', ()=>{
-  const target = document.getElementById(skipRsvpForm ? 'thankyou' : 'form-section');
-  target.scrollIntoView({behavior:'smooth'});
+  document.getElementById('form-section').scrollIntoView({behavior:'smooth'});
 });
 
 /* ================= COUNTDOWN ================= */
@@ -1272,7 +1375,6 @@ musicBtn.addEventListener('click', ()=>{
 });
 
 /* ================= THE QUESTION ================= */
-let skipRsvpForm = false;
 /* guard against mobile browsers' scroll-anchoring jumping to a
    neighboring section when this section's height changes suddenly */
 function holdScrollPosition(sectionId){
@@ -1294,18 +1396,12 @@ document.getElementById('btn-yes').addEventListener('click', ()=>{
   holdScrollPosition('question');
 });
 document.getElementById('btn-maybe').addEventListener('click', ()=>{
-  skipRsvpForm = true;
-  document.getElementById('form-section').style.display = 'none';
   document.getElementById('envelope-yes').style.display='none';
   document.getElementById('envelope-maybe').style.display='block';
-  document.getElementById('to-form').style.display='none';
   document.getElementById('letter-wrap').classList.add('show');
   document.getElementById('btn-yes').style.display='none';
   document.getElementById('btn-maybe').style.display='none';
   holdScrollPosition('question');
-  setTimeout(()=>{
-    document.getElementById('thankyou').scrollIntoView({behavior:'smooth'});
-  }, 2200);
 });
 function confettiBurst(){
   if(typeof confetti !== 'function') return;
