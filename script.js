@@ -256,10 +256,26 @@ if(REDUCE_MOTION){
         const match = groups.find(g => g.name.toLowerCase() === toParam);
         if(match) groups = [match];
       }
-      container.classList.toggle('single', groups.length === 1);
 
-      let idx = 0;
-      groups.forEach((group, gi)=>{
+      // always render at least MIN_COLUMNS columns — a filtered/personalized
+      // view (often just one matching folder) repeats that folder's photos
+      // across extra columns rather than showing a single lonely column.
+      // Each repeated column starts at a different rotation offset into the
+      // photo list so columns don't all show the same photo up top.
+      const MIN_COLUMNS = 4;
+      const totalColumns = Math.max(groups.length, MIN_COLUMNS);
+      const groupIdxMap = new Map();
+      let nextIdx = 0;
+      groups.forEach(g => { groupIdxMap.set(g.name, nextIdx); nextIdx += g.photos.length; });
+
+      for(let ci = 0; ci < totalColumns; ci++){
+        const group = groups[ci % groups.length];
+        const repIndex = Math.floor(ci / groups.length);
+        const repsOfThisGroup = Math.ceil(totalColumns / groups.length);
+        const uniqueCount = group.photos.length;
+        const offset = uniqueCount > 0 ? Math.floor((uniqueCount / repsOfThisGroup) * repIndex) : 0;
+        const startIdx = groupIdxMap.get(group.name);
+
         const col = document.createElement('div');
         col.className = 'friend-col';
 
@@ -272,11 +288,9 @@ if(REDUCE_MOTION){
         imageCol.className = 'image-column';
 
         const track = document.createElement('div');
-        track.className = 'track ' + (gi % 2 === 0 ? 'up' : 'down');
+        track.className = 'track ' + (ci % 2 === 0 ? 'up' : 'down');
 
-        const startIdx = idx;
         const encodedFolder = encodeURIComponent(group.name);
-        const uniqueCount = group.photos.length;
         // folders with few photos get their list cycled/repeated so the
         // column still looks full when auto-scrolling, instead of looping
         // through a handful of images too quickly
@@ -284,22 +298,21 @@ if(REDUCE_MOTION){
         const displayCount = Math.max(uniqueCount, MIN_PHOTOS_PER_COLUMN);
         for(let rep = 0; rep < 2; rep++){
           for(let pos = 0; pos < displayCount; pos++){
-            const uniquePos = pos % uniqueCount;
-            const file = group.photos[uniquePos];
+            const originalIndex = (pos + offset) % uniqueCount;
+            const file = group.photos[originalIndex];
             const img = document.createElement('img');
             img.src = 'images/friends/' + encodedFolder + '/' + encodeURIComponent(file);
             img.alt = '';
             img.loading = 'lazy';
-            img.dataset.idx = String(startIdx + uniquePos);
+            img.dataset.idx = String(startIdx + originalIndex);
             track.appendChild(img);
           }
         }
-        idx = startIdx + uniqueCount;
 
         imageCol.appendChild(track);
         col.appendChild(imageCol);
         container.appendChild(col);
-      });
+      }
 
       if(window.rebindFriendsLightbox) window.rebindFriendsLightbox();
       ScrollTrigger.refresh();
