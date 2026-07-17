@@ -251,6 +251,13 @@ if(REDUCE_MOTION){
   fetch('images/friends/manifest.json')
     .then(r => r.json())
     .then(groups => {
+      const toParam = (new URLSearchParams(location.search).get('to') || '').trim().toLowerCase();
+      if(toParam){
+        const match = groups.find(g => g.name.toLowerCase() === toParam);
+        if(match) groups = [match];
+      }
+      container.classList.toggle('single', groups.length === 1);
+
       let idx = 0;
       groups.forEach((group, gi)=>{
         const col = document.createElement('div');
@@ -269,17 +276,25 @@ if(REDUCE_MOTION){
 
         const startIdx = idx;
         const encodedFolder = encodeURIComponent(group.name);
+        const uniqueCount = group.photos.length;
+        // folders with few photos get their list cycled/repeated so the
+        // column still looks full when auto-scrolling, instead of looping
+        // through a handful of images too quickly
+        const MIN_PHOTOS_PER_COLUMN = 18;
+        const displayCount = Math.max(uniqueCount, MIN_PHOTOS_PER_COLUMN);
         for(let rep = 0; rep < 2; rep++){
-          group.photos.forEach((file, pi)=>{
+          for(let pos = 0; pos < displayCount; pos++){
+            const uniquePos = pos % uniqueCount;
+            const file = group.photos[uniquePos];
             const img = document.createElement('img');
             img.src = 'images/friends/' + encodedFolder + '/' + encodeURIComponent(file);
             img.alt = '';
             img.loading = 'lazy';
-            img.dataset.idx = String(startIdx + pi);
+            img.dataset.idx = String(startIdx + uniquePos);
             track.appendChild(img);
-          });
+          }
         }
-        idx = startIdx + group.photos.length;
+        idx = startIdx + uniqueCount;
 
         imageCol.appendChild(track);
         col.appendChild(imageCol);
@@ -442,12 +457,59 @@ function holdScrollPosition(sectionId){
   });
 }
 
+/* ================= LOCK SCROLL ON "WILL YOU BE MY BRIDESMAID?" UNTIL ANSWERED =================
+   Once the user's scroll lands on #question, forward scrolling (wheel/touch/
+   keyboard) is blocked until they tap Yes or Not Sure Yet. Scrolling back up
+   to revisit earlier sections stays free. */
+(function(){
+  const questionSection = document.getElementById('question');
+  if(!questionSection) return;
+  let onQuestion = false;
+  let answered = false;
+  let lastNudge = 0;
+
+  ScrollTrigger.create({
+    trigger: questionSection, scroller: scroller,
+    start: 'top center', end: 'bottom center',
+    onEnter: ()=> onQuestion = true,
+    onEnterBack: ()=> onQuestion = true,
+    onLeave: ()=> onQuestion = false,
+    onLeaveBack: ()=> onQuestion = false
+  });
+
+  function nudge(){
+    const now = Date.now();
+    if(now - lastNudge < 700) return;
+    lastNudge = now;
+    gsap.fromTo('.q-actions', {x:-8}, {x:0, duration:.5, ease:'elastic.out(1,0.3)'});
+  }
+
+  scroller.addEventListener('wheel', (e)=>{
+    if(onQuestion && !answered && e.deltaY > 0){ e.preventDefault(); nudge(); }
+  }, {passive:false});
+
+  let touchStartY = null;
+  scroller.addEventListener('touchstart', (e)=>{ touchStartY = e.touches[0].clientY; }, {passive:true});
+  scroller.addEventListener('touchmove', (e)=>{
+    if(!onQuestion || answered || touchStartY === null) return;
+    if(touchStartY - e.touches[0].clientY > 0){ e.preventDefault(); nudge(); }
+  }, {passive:false});
+
+  window.addEventListener('keydown', (e)=>{
+    if(!onQuestion || answered) return;
+    if(e.key === 'ArrowDown' || e.key === 'PageDown' || e.key === ' '){ e.preventDefault(); nudge(); }
+  });
+
+  window.markQuestionAnswered = ()=>{ answered = true; };
+})();
+
 document.getElementById('btn-yes').addEventListener('click', ()=>{
   confettiBurst();
   document.getElementById('letter-wrap').classList.add('show');
   document.getElementById('btn-yes').style.display='none';
   document.getElementById('btn-maybe').style.display='none';
   holdScrollPosition('question');
+  window.markQuestionAnswered();
 });
 document.getElementById('btn-maybe').addEventListener('click', ()=>{
   document.getElementById('envelope-yes').style.display='none';
@@ -455,6 +517,7 @@ document.getElementById('btn-maybe').addEventListener('click', ()=>{
   document.getElementById('letter-wrap').classList.add('show');
   document.getElementById('btn-yes').style.display='none';
   document.getElementById('btn-maybe').style.display='none';
+  window.markQuestionAnswered();
   holdScrollPosition('question');
 });
 function confettiBurst(){
