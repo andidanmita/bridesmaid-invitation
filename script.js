@@ -369,15 +369,39 @@ setInterval(tickCountdown, 1000);
 (function(){
   const lb = document.getElementById('lightbox');
   const lbImg = document.getElementById('lb-img');
+  const frameWrap = document.getElementById('lb-frame-wrap');
+  const lbFrame = document.getElementById('lb-frame');
   let imgs = [];
   let idx = 0;
+  let currentKind = null;
+
+  /* friend photos get an overlaid camera-frame (portrait or landscape PNG)
+     picked from the loaded image's own aspect ratio; journey photos never
+     get a frame. Window position inside each PNG was measured by ray-casting
+     from its transparent center out to the opaque border (see the % insets
+     on .lb-frame-wrap in style.css). */
+  function applyFrame(){
+    if(currentKind !== 'friend'){
+      frameWrap.classList.remove('framed','landscape','portrait');
+      return;
+    }
+    if(!lbImg.naturalWidth) return; // onload below will call this again once it's ready
+    const isPortrait = lbImg.naturalHeight > lbImg.naturalWidth;
+    frameWrap.classList.toggle('landscape', !isPortrait);
+    frameWrap.classList.toggle('portrait', isPortrait);
+    lbFrame.src = isPortrait ? 'images/frame_potrait.png' : 'images/frame_landscape.png';
+    frameWrap.classList.add('framed');
+  }
+  lbImg.addEventListener('load', applyFrame);
 
   function show(i){
     idx = (i + imgs.length) % imgs.length;
     lbImg.src = imgs[idx].src;
+    applyFrame();
   }
-  function open(list, i){
+  function open(list, i, kind){
     imgs = list;
+    currentKind = kind || null;
     show(i);
     lb.classList.add('show');
   }
@@ -400,7 +424,7 @@ setInterval(tickCountdown, 1000);
     });
     scrollImgs.forEach(img=>{
       const i = parseInt(img.dataset.idx, 10);
-      img.addEventListener('click', ()=> open(uniqueByIdx, i));
+      img.addEventListener('click', ()=> open(uniqueByIdx, i, 'friend'));
     });
   }
   bindFriendsGallery();

@@ -11,7 +11,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Marcellus&family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Jost:wght@300;400;500;600&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="style.css?v=20260717c">
 </head>
 <body>
 
@@ -299,11 +299,14 @@
 
 </div>
 
-<!-- Journey lightbox -->
+<!-- Journey / Friends lightbox -->
 <div id="lightbox">
   <button class="lb-close" id="lb-close" aria-label="Close">✕</button>
   <button class="lb-prev" id="lb-prev" aria-label="Previous">‹</button>
-  <img id="lb-img" src="" alt="">
+  <div class="lb-frame-wrap" id="lb-frame-wrap">
+    <img id="lb-img" src="" alt="">
+    <img id="lb-frame" src="" alt="" aria-hidden="true">
+  </div>
   <button class="lb-next" id="lb-next" aria-label="Next">›</button>
 </div>
 
@@ -333,6 +336,6 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/canvas-confetti/1.9.2/confetti.browser.min.js"></script>
 
-<script src="script.js"></script>
+<script src="script.js?v=20260717c"></script>
 </body>
 </html>

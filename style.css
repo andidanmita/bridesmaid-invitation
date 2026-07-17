@@ -381,6 +381,24 @@ h1.is-split,h2.is-split,
 }
 #lightbox.show{display:flex;}
 #lightbox img{max-width:92vw;max-height:80vh;object-fit:contain;box-shadow:var(--shadow);user-select:none;}
+#lightbox .lb-frame-wrap{position:relative;display:flex;align-items:center;justify-content:center;max-width:92vw;max-height:80vh;}
+#lb-frame{display:none;}
+/* friend-photo frame overlay: window position/size ray-cast from the PNGs'
+   transparent centers, expressed as % insets so it lines up at any size */
+#lightbox .lb-frame-wrap.landscape{aspect-ratio:1536/1024;width:auto;height:min(80vh, 92vw / 1.5);}
+#lightbox .lb-frame-wrap.portrait{aspect-ratio:1024/1536;width:auto;height:min(80vh, 92vw * 1.5);}
+#lightbox .lb-frame-wrap.framed #lb-img{
+  position:absolute;max-width:none;max-height:none;box-shadow:none;object-fit:cover;
+}
+/* width/height set explicitly (not derived from opposite insets) because
+   absolutely-positioned replaced elements like <img> ignore right/bottom
+   for sizing and fall back to intrinsic size otherwise */
+#lightbox .lb-frame-wrap.landscape #lb-img{top:18.36%;left:7.36%;width:85.28%;height:60.35%;}
+#lightbox .lb-frame-wrap.portrait #lb-img{top:14.58%;left:14.06%;width:71.98%;height:69.27%;}
+#lightbox .lb-frame-wrap.framed #lb-frame{
+  display:block;position:absolute;inset:0;width:100%;height:100%;max-width:none;max-height:none;
+  object-fit:fill;box-shadow:none;pointer-events:none;
+}
 #lightbox button{
   position:absolute;background:rgba(251,245,236,.12);color:var(--ivory);
   border:1px solid rgba(251,245,236,.4);width:44px;height:44px;border-radius:50%;
