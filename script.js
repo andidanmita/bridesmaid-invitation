@@ -95,8 +95,8 @@ function playOpening(){
   if(bg) tl.to(bg, {scale:1.12, duration:9, ease:'power2.inOut'}, 0);
   tl.add(()=>{ if(eyebrow) eyebrow.classList.add('in'); }, .05);
   tl.to(chars, {opacity:1, y:0, filter:'blur(0px)', duration:.6, stagger:.018}, .2);
-  tl.to(words, {opacity:1, y:0, filter:'blur(0px)', duration:.45, stagger:.045, ease:'power3.out'}, '-=.25');
-  tl.add(()=>{ if(btn) btn.classList.add('in'); }, '+=.03');
+  tl.to(words, {opacity:1, y:0, filter:'blur(0px)', duration:.45, stagger:.045, ease:'power3.out'}, .45);
+  tl.add(()=>{ if(btn) btn.classList.add('in'); }, '+=.05');
 }
 
 /* ================= LOADING ================= */
