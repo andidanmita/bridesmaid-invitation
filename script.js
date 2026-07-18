@@ -704,7 +704,7 @@ document.getElementById('rsvp-form').addEventListener('submit', (e)=>{
   upsertWishCard(existingRsvpId, data);
 
   confettiBurst();
-  showToast(existingRsvpId ? 'Your confirmation has been updated 💛' : 'Thank you! Your confirmation has been saved 💛');
+  showToast(existingRsvpId ? 'Your confirmation has been updated 🤎' : 'Thank you! Your confirmation has been saved 🤎');
   setTimeout(()=>{
     scrollToSection('wishes');
   }, 700);

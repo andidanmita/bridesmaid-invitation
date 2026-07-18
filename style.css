@@ -459,7 +459,6 @@ h1.is-split,h2.is-split,
 .track.down{animation:scrollDown 32s linear infinite;}
 @keyframes scrollUp{from{transform:translateY(0);}to{transform:translateY(-50%);}}
 @keyframes scrollDown{from{transform:translateY(-50%);}to{transform:translateY(0);}}
-.scroll-gallery:hover .track{animation-play-state:paused;}
 @media (prefers-reduced-motion: reduce){.track{animation:none !important;}}
 .friend-lines{width:100%;text-align:center;margin-top:clamp(8px,2vh,22px);}
 .friend-lines .line{
