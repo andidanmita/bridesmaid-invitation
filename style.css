@@ -475,9 +475,10 @@ h1.is-split,h2.is-split,
 .track{display:flex;flex-direction:column;will-change:transform;}
 .track img{
   width:100%;height:clamp(46px,12.5vw,76px);object-fit:cover;display:block;
-  cursor:pointer;filter:grayscale(1);flex:none;
-  transition:transform .8s var(--ease-expo), filter .5s var(--ease-expo);
+  cursor:pointer;filter:grayscale(1);flex:none;background:rgba(180,135,79,.12);
+  opacity:0;transition:transform .8s var(--ease-expo), filter .5s var(--ease-expo), opacity .5s ease;
 }
+.track img.loaded{opacity:1;}
 .track img:hover{transform:scale(1.08) rotate(1deg);filter:grayscale(.4) brightness(1.08);z-index:1;position:relative;}
 .track.up{animation:scrollUp 32s linear infinite;}
 .track.down{animation:scrollDown 32s linear infinite;}

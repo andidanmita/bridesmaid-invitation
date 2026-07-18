@@ -312,6 +312,7 @@ if(REDUCE_MOTION){
             img.alt = '';
             img.loading = 'lazy';
             img.dataset.idx = String(startIdx + originalIndex);
+            img.addEventListener('load', ()=> img.classList.add('loaded'));
             track.appendChild(img);
           }
         }
