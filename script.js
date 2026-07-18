@@ -252,7 +252,7 @@ if(REDUCE_MOTION){
 (function(){
   const container = document.getElementById('friend-cols');
   if(!container) return;
-  fetch('images/friends/manifest.json')
+  fetch('images/friends/manifest.json?t=' + Date.now())
     .then(r => r.json())
     .then(groups => {
       const toParam = (new URLSearchParams(location.search).get('to') || '').trim().toLowerCase();
