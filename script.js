@@ -762,7 +762,7 @@ document.addEventListener('click', (e)=>{
    mouse pointers so tapping never moves the photo at all. */
 const HAS_FINE_POINTER = window.matchMedia('(pointer: fine)').matches;
 if(HAS_FINE_POINTER){
-  ['#welcome .bg','#reveal .bg'].forEach(sel=>{
+  ['#welcome .bg'].forEach(sel=>{
     const el = document.querySelector(sel);
     if(!el) return;
     el.parentElement.addEventListener('mousemove', (e)=>{
@@ -773,17 +773,18 @@ if(HAS_FINE_POINTER){
   });
 }
 
-/* ================= REVEAL BACKGROUND SLOW ZOOM (bg2) =================
-   Same slow Ken Burns zoom as the Welcome background, but triggered by
-   scrolling into #reveal instead of the loading-screen tap, and it
-   replays every time the section is scrolled back into view. */
+/* ================= REVEAL BACKGROUND ZOOM (bg2) =================
+   Ken Burns zoom triggered by scrolling into #reveal, replaying every
+   time the section re-enters view. Scroll-only — this background is
+   deliberately left out of the mousemove parallax above, so there's no
+   click/drag-driven zoom fighting with this animation. */
 (function(){
   const bg = document.querySelector('#reveal .bg');
   if(!bg) return;
   ScrollTrigger.create({
     trigger:'#reveal', scroller:scroller, start:'top 70%', end:'bottom 20%',
-    onEnter: ()=> gsap.to(bg, {scale:1.12, duration:9, ease:'power2.inOut', overwrite:true}),
-    onEnterBack: ()=> gsap.to(bg, {scale:1.12, duration:9, ease:'power2.inOut', overwrite:true}),
+    onEnter: ()=> gsap.to(bg, {scale:1.12, duration:4, ease:'power2.inOut', overwrite:true}),
+    onEnterBack: ()=> gsap.to(bg, {scale:1.12, duration:4, ease:'power2.inOut', overwrite:true}),
     onLeave: ()=> gsap.set(bg, {scale:1}),
     onLeaveBack: ()=> gsap.set(bg, {scale:1})
   });
