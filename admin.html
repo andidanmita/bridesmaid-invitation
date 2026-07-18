@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex, nofollow">
+<title>RSVP Admin</title>
+<link rel="icon" href="icon.png" type="image/png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Marcellus&family=Jost:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css?v=20260718b">
+<style>
+  body{min-height:100vh;background:var(--ivory);padding:40px 20px 80px;}
+  .a-wrap{max-width:1000px;margin:0 auto;}
+  .a-wrap h2{color:var(--mahogany-950);margin-bottom:6px;}
+  .a-wrap .eyebrow{color:var(--mahogany-600);}
+
+  #gate{max-width:340px;margin:120px auto 0;text-align:center;}
+  #gate input{
+    width:100%;padding:12px 14px;font-family:'Jost';font-size:1rem;
+    border:1px solid rgba(74,36,28,.3);border-radius:8px;margin:16px 0;background:var(--ivory);color:var(--mahogany-950);
+  }
+  #gate .btn{width:100%;justify-content:center;}
+  #gate .err{color:#a33;font-size:.82rem;min-height:1.2em;}
+
+  .stat-row{display:flex;gap:16px;margin:24px 0;flex-wrap:wrap;}
+  .stat{background:var(--mahogany-950);color:var(--ivory);padding:16px 22px;min-width:120px;}
+  .stat b{display:block;font-family:'Marcellus';font-size:1.6rem;}
+  .stat span{font-size:.68rem;letter-spacing:.1em;text-transform:uppercase;opacity:.7;}
+
+  .toolbar{display:flex;gap:12px;align-items:center;margin-bottom:20px;flex-wrap:wrap;}
+  .toolbar .btn{border-color:var(--mahogany-800);color:var(--mahogany-800);}
+
+  table{width:100%;border-collapse:collapse;margin-top:10px;font-size:.85rem;}
+  th,td{border-bottom:1px solid rgba(74,36,28,.15);padding:10px 8px;text-align:left;vertical-align:top;}
+  th{font-size:.68rem;letter-spacing:.08em;text-transform:uppercase;color:var(--mahogany-600);}
+  td.msg{max-width:220px;white-space:pre-wrap;}
+  .del-btn{
+    background:none;border:1px solid rgba(163,51,51,.4);color:#a33;border-radius:6px;
+    padding:5px 10px;font-size:.75rem;cursor:pointer;
+  }
+  .del-btn:hover{background:rgba(163,51,51,.08);}
+  #admin-empty{color:var(--mahogany-600);font-style:italic;padding:20px 0;}
+  #admin-app{display:none;}
+</style>
+</head>
+<body>
+
+<div id="gate">
+  <div class="eyebrow">RSVP Admin</div>
+  <h2 style="color:var(--mahogany-950);font-family:'Marcellus'">Enter password</h2>
+  <input type="password" id="gate-pass" placeholder="Password">
+  <button class="btn" id="gate-submit">Unlock</button>
+  <div class="err" id="gate-err"></div>
+</div>
+
+<div class="a-wrap" id="admin-app">
+  <div class="eyebrow">Dashboard</div>
+  <h2>Bridesmaid Confirmation Summary</h2>
+  <div class="stat-row" id="admin-stats"></div>
+  <div class="toolbar">
+    <button class="btn" id="export-csv">Export to CSV / Excel</button>
+    <button class="btn" id="refresh-data">Refresh</button>
+  </div>
+  <div id="admin-empty" style="display:none;">No responses yet.</div>
+  <div style="overflow-x:auto;">
+    <table id="admin-table">
+      <thead><tr>
+        <th>Name</th><th>Status</th><th>Size</th><th>Hijab</th><th>Notes</th><th>Message</th><th>Submitted</th><th></th>
+      </tr></thead>
+      <tbody></tbody>
+    </table>
+  </div>
+</div>
+
+<script>
+  /* Change this before relying on the password gate for anything real — it's
+     a UI-level deterrent only (visible to anyone who reads this file's
+     source), same trust level as the rest of this no-login site. */
+  const ADMIN_PASSWORD = 'CHANGE_ME';
+
+  const SUPABASE_URL = 'https://gxkbldbrsheuzqmxreyw.supabase.co';
+  const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imd4a2JsZGJyc2hldXpxbXhyZXl3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODQzNDUwNzcsImV4cCI6MjA5OTkyMTA3N30.UKPQY19XpLR3ClnnLdY1xwCZ3h9tXY_1j8WOWQFdEcI';
+  const HEADERS = {
+    'Content-Type': 'application/json',
+    'apikey': SUPABASE_ANON_KEY,
+    'Authorization': 'Bearer ' + SUPABASE_ANON_KEY
+  };
+
+  let rows = [];
+
+  function unlock(){
+    document.getElementById('gate').style.display = 'none';
+    document.getElementById('admin-app').style.display = 'block';
+    loadData();
+  }
+
+  document.getElementById('gate-submit').addEventListener('click', tryUnlock);
+  document.getElementById('gate-pass').addEventListener('keydown', (e)=>{ if(e.key === 'Enter') tryUnlock(); });
+  function tryUnlock(){
+    const val = document.getElementById('gate-pass').value;
+    if(val === ADMIN_PASSWORD) unlock();
+    else document.getElementById('gate-err').textContent = 'Wrong password.';
+  }
+
+  function loadData(){
+    fetch(SUPABASE_URL + '/rest/v1/rsvp?select=*&order=id.desc', { headers: HEADERS })
+      .then(r => r.json())
+      .then(data => { rows = data; render(); })
+      .catch(err => console.error('Failed to load RSVP data', err));
+  }
+
+  function render(){
+    const hadir = rows.filter(x => x.konfirmasi === 'Attending').length;
+    document.getElementById('admin-stats').innerHTML = `
+      <div class="stat"><b>${rows.length}</b><span>Total Responses</span></div>
+      <div class="stat"><b>${hadir}</b><span>Confirmed Attending</span></div>
+      <div class="stat"><b>${rows.length - hadir}</b><span>Not Sure Yet</span></div>
+    `;
+    document.getElementById('admin-empty').style.display = rows.length ? 'none' : 'block';
+    const tbody = document.querySelector('#admin-table tbody');
+    tbody.innerHTML = rows.map(x => `
+      <tr data-id="${x.id}">
+        <td>${esc(x.nama)}</td>
+        <td>${esc(x.konfirmasi)}</td>
+        <td>${esc(x.ukuran)}${x.ukuran === 'Custom' ? ` (Bust:${esc(x.dada)} Waist:${esc(x.pinggang)} Hips:${esc(x.pinggul)} Height:${esc(x.tinggi)})` : ''}</td>
+        <td>${esc(x.hijab)}</td>
+        <td>${esc(x.catatan)}</td>
+        <td class="msg">${esc(x.ucapan)}</td>
+        <td>${x.waktu ? new Date(x.waktu).toLocaleString() : '-'}</td>
+        <td><button class="del-btn" data-id="${x.id}">Delete</button></td>
+      </tr>
+    `).join('');
+  }
+
+  function esc(v){ return v ? String(v).replace(/&/g,'&amp;').replace(/</g,'&lt;') : '-'; }
+
+  document.querySelector('#admin-table tbody').addEventListener('click', (e)=>{
+    if(!e.target.classList.contains('del-btn')) return;
+    const id = e.target.dataset.id;
+    if(!confirm('Delete this response? This cannot be undone.')) return;
+    fetch(SUPABASE_URL + '/rest/v1/rsvp?id=eq.' + id, {
+      method: 'DELETE',
+      headers: { ...HEADERS, 'Prefer': 'return=representation' }
+    })
+      .then(r => r.json())
+      .then(deleted => {
+        if(!deleted.length){
+          alert('Delete did not go through — run the update/delete SQL migration in Supabase first (see supabase-setup.sql).');
+          return;
+        }
+        rows = rows.filter(x => String(x.id) !== String(id));
+        render();
+      })
+      .catch(err => console.error('Failed to delete', err));
+  });
+
+  document.getElementById('refresh-data').addEventListener('click', loadData);
+
+  document.getElementById('export-csv').addEventListener('click', ()=>{
+    const headers = ['Name','Status','Size','Bust/Chest','Waist','Hips','Height','Hijab','Notes','Message','Submitted At'];
+    const csvRows = rows.map(x => [x.nama,x.konfirmasi,x.ukuran,x.dada,x.pinggang,x.pinggul,x.tinggi,x.hijab,x.catatan,x.ucapan,x.waktu]);
+    let csv = headers.join(',') + '\n' + csvRows.map(r => r.map(v => `"${String(v||'').replace(/"/g,'""')}"`).join(',')).join('\n');
+    const blob = new Blob(['﻿' + csv], {type: 'text/csv;charset=utf-8;'});
+    const link = document.createElement('a');
+    link.href = URL.createObjectURL(blob);
+    link.download = 'bridesmaid-confirmations.csv';
+    link.click();
+  });
+</script>
+</body>
+</html>

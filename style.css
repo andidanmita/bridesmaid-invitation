@@ -592,22 +592,6 @@ form#rsvp-form{
 }
 #toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
 
-/* ===================== ADMIN OVERLAY ===================== */
-#admin{
-  position:fixed;inset:0;z-index:9995;background:var(--ivory);overflow:auto;padding:40px 20px 80px;display:none;
-}
-#admin.show{display:block;}
-#admin .a-wrap{max-width:900px;margin:0 auto;}
-#admin h2{color:var(--mahogany-950);margin-bottom:6px;}
-#admin .stat-row{display:flex;gap:16px;margin:24px 0;flex-wrap:wrap;}
-#admin .stat{background:var(--mahogany-950);color:var(--ivory);padding:16px 22px;min-width:120px;}
-#admin .stat b{display:block;font-family:'Marcellus';font-size:1.6rem;}
-#admin .stat span{font-size:.68rem;letter-spacing:.1em;text-transform:uppercase;opacity:.7;}
-#admin table{width:100%;border-collapse:collapse;margin-top:10px;font-size:.85rem;}
-#admin th,#admin td{border-bottom:1px solid rgba(74,36,28,.15);padding:10px 8px;text-align:left;vertical-align:top;}
-#admin th{font-size:.68rem;letter-spacing:.08em;text-transform:uppercase;color:var(--mahogany-600);}
-#admin .close-admin{position:fixed;top:18px;right:18px;background:var(--mahogany-950);color:var(--ivory);border:none;width:38px;height:38px;cursor:pointer;}
-
 /* ===================== RESPONSIVE ===================== */
 @media (max-width:820px){
   #detail .wrap{grid-template-columns:1fr;gap:34px;}

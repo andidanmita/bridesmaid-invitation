@@ -31,3 +31,30 @@ create policy "public can insert rsvp" on rsvp
 create policy "public can read rsvp" on rsvp
   for select to anon
   using (true);
+
+
+-- ============================================================
+-- UPDATE #2: edit-on-resubmit + admin.html (jalankan sekali lagi
+-- di SQL Editor, sama seperti langkah di atas)
+-- ============================================================
+
+-- guest_key = nilai ?to= (huruf kecil), dipakai untuk mendeteksi tamu yang
+-- sama supaya isi form-nya bisa diedit alih-alih bikin baris duplikat.
+alter table rsvp add column if not exists guest_key text;
+
+-- Ukuran custom (dada/pinggang/pinggul/tinggi) sudah ditanya di form tapi
+-- belum pernah disimpan ke Supabase — dibutuhkan supaya admin.html bisa
+-- menampilkannya.
+alter table rsvp add column if not exists dada text;
+alter table rsvp add column if not exists pinggang text;
+alter table rsvp add column if not exists pinggul text;
+alter table rsvp add column if not exists tinggi text;
+
+-- Guest bisa mengedit isian sendiri (dicocokkan lewat guest_key), dan
+-- admin.html bisa menghapus baris. anon key memang publik (ada di kode
+-- situs), jadi ini keputusan sadar untuk situs kecil tanpa login.
+create policy "public can update rsvp" on rsvp
+  for update to anon using (true) with check (true);
+
+create policy "public can delete rsvp" on rsvp
+  for delete to anon using (true);

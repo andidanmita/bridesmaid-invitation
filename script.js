@@ -1,4 +1,8 @@
-/* ================= GUEST NAME FROM ?to= ================= */
+/* ================= GUEST NAME FROM ?to= =================
+   GUEST_KEY (lowercased) is reused later to detect a returning guest's
+   previous RSVP submission, independent of whatever they type as their
+   display name. */
+const GUEST_KEY = (new URLSearchParams(location.search).get('to') || '').trim().toLowerCase();
 (function(){
   const params = new URLSearchParams(location.search);
   const name = params.get('to');
@@ -595,6 +599,54 @@ document.querySelectorAll('input[name=konfirmasi]').forEach(r=>{
 const SUPABASE_URL = 'https://gxkbldbrsheuzqmxreyw.supabase.co';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imd4a2JsZGJyc2hldXpxbXhyZXl3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODQzNDUwNzcsImV4cCI6MjA5OTkyMTA3N30.UKPQY19XpLR3ClnnLdY1xwCZ3h9tXY_1j8WOWQFdEcI';
 const SUPABASE_READY = SUPABASE_URL.startsWith('http') && SUPABASE_ANON_KEY.length > 20;
+const SUPABASE_HEADERS = {
+  'Content-Type': 'application/json',
+  'apikey': SUPABASE_ANON_KEY,
+  'Authorization': 'Bearer ' + SUPABASE_ANON_KEY
+};
+
+/* ================= RETURNING GUEST: PREFILL + EDIT INSTEAD OF DUPLICATE =================
+   If this link has a ?to= and that guest already has a row (matched by
+   guest_key, not the free-text name field), load their previous answers
+   into the form and remember the row id so submit updates it instead of
+   inserting a new one. */
+let existingRsvpId = null;
+if(GUEST_KEY && SUPABASE_READY){
+  fetch(SUPABASE_URL + '/rest/v1/rsvp?guest_key=eq.' + encodeURIComponent(GUEST_KEY) + '&select=*&limit=1', {
+    headers: SUPABASE_HEADERS
+  })
+    .then(r => r.json())
+    .then(rows => {
+      const row = rows[0];
+      if(!row) return;
+      existingRsvpId = row.id;
+
+      document.getElementById('f-nama').value = row.nama || '';
+      document.getElementById('f-catatan').value = row.catatan || '';
+      document.getElementById('f-ucapan').value = row.ucapan || '';
+      document.getElementById('f-dada').value = row.dada || '';
+      document.getElementById('f-pinggang').value = row.pinggang || '';
+      document.getElementById('f-pinggul').value = row.pinggul || '';
+      document.getElementById('f-tinggi').value = row.tinggi || '';
+
+      const konfirmasiRadio = document.querySelector('input[name=konfirmasi][value="' + row.konfirmasi + '"]');
+      if(konfirmasiRadio){ konfirmasiRadio.checked = true; konfirmasiRadio.dispatchEvent(new Event('change')); }
+      if(row.ukuran){
+        const ukuranRadio = document.querySelector('input[name=ukuran][value="' + row.ukuran + '"]');
+        if(ukuranRadio){ ukuranRadio.checked = true; ukuranRadio.dispatchEvent(new Event('change')); }
+      }
+      if(row.hijab){
+        const hijabRadio = document.querySelector('input[name=hijab][value="' + row.hijab + '"]');
+        if(hijabRadio) hijabRadio.checked = true;
+      }
+
+      const submitBtn = document.querySelector('#rsvp-form button[type=submit]');
+      if(submitBtn) submitBtn.textContent = 'Update Confirmation';
+      const hint = document.querySelector('#rsvp-form .f-hint');
+      if(hint) hint.textContent = "You've already responded — feel free to update it below.";
+    })
+    .catch(()=>{});
+}
 
 document.getElementById('rsvp-form').addEventListener('submit', (e)=>{
   e.preventDefault();
@@ -617,38 +669,30 @@ document.getElementById('rsvp-form').addEventListener('submit', (e)=>{
   localStorage.setItem('bridesmaid_rsvp', JSON.stringify(list));
 
   if(SUPABASE_READY){
-    fetch(SUPABASE_URL + '/rest/v1/rsvp', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'apikey': SUPABASE_ANON_KEY,
-        'Authorization': 'Bearer ' + SUPABASE_ANON_KEY,
-        'Prefer': 'return=minimal'
-      },
-      body: JSON.stringify({
-        nama: data.nama, konfirmasi: data.konfirmasi, ukuran: data.ukuran,
-        hijab: data.hijab, catatan: data.catatan, ucapan: data.ucapan
-      })
-    }).catch(()=>{});
+    const body = JSON.stringify({
+      nama: data.nama, konfirmasi: data.konfirmasi, ukuran: data.ukuran,
+      dada: data.dada, pinggang: data.pinggang, pinggul: data.pinggul, tinggi: data.tinggi,
+      hijab: data.hijab, catatan: data.catatan, ucapan: data.ucapan, guest_key: GUEST_KEY
+    });
+    if(existingRsvpId){
+      fetch(SUPABASE_URL + '/rest/v1/rsvp?id=eq.' + existingRsvpId, {
+        method: 'PATCH',
+        headers: { ...SUPABASE_HEADERS, 'Prefer': 'return=minimal' },
+        body
+      }).catch(()=>{});
+    } else {
+      fetch(SUPABASE_URL + '/rest/v1/rsvp', {
+        method: 'POST',
+        headers: { ...SUPABASE_HEADERS, 'Prefer': 'return=minimal' },
+        body
+      }).catch(()=>{});
+    }
   }
 
-  if((data.ucapan || '').trim()) addWishCard(data, true);
-
-  const waLines = [
-    'Hi! I would like to confirm my attendance:',
-    '',
-    'Name: ' + (data.nama || '-'),
-    'Attendance: ' + (data.konfirmasi || '-'),
-    'Dress Size: ' + (data.ukuran || '-') + (data.ukuran === 'Custom' ? ' (Bust:' + (data.dada||'-') + ' Waist:' + (data.pinggang||'-') + ' Hips:' + (data.pinggul||'-') + ' Height:' + (data.tinggi||'-') + ')' : ''),
-    'Hijab: ' + (data.hijab || '-'),
-    'Notes: ' + (data.catatan || '-'),
-    'Message: ' + (data.ucapan || '-')
-  ];
-  const waText = encodeURIComponent(waLines.join('\n'));
-  window.open('https://wa.me/6289659050130?text=' + waText, '_blank');
+  if(!existingRsvpId && (data.ucapan || '').trim()) addWishCard(data, true);
 
   confettiBurst();
-  showToast('Thank you! Your confirmation has been saved 💛');
+  showToast(existingRsvpId ? 'Your confirmation has been updated 💛' : 'Thank you! Your confirmation has been saved 💛');
   setTimeout(()=>{
     scrollToSection('thankyou');
   }, 700);
@@ -707,45 +751,6 @@ function addWishCard(r, prepend){
       rows.filter(r => (r.ucapan || '').trim()).forEach(r => addWishCard(r));
     })
     .catch(err => console.error('Failed to load wishes', err));
-})();
-
-/* ================= ADMIN DASHBOARD (?admin=1) ================= */
-(function(){
-  const params = new URLSearchParams(location.search);
-  if(params.get('admin') !== '1') return;
-  const admin = document.getElementById('admin');
-  admin.classList.add('show');
-  document.getElementById('close-admin').addEventListener('click', ()=> admin.classList.remove('show'));
-
-  const list = JSON.parse(localStorage.getItem('bridesmaid_rsvp') || '[]');
-  const hadir = list.filter(x=>x.konfirmasi==='Attending').length;
-  document.getElementById('admin-stats').innerHTML = `
-    <div class="stat"><b>${list.length}</b><span>Total Responses</span></div>
-    <div class="stat"><b>${hadir}</b><span>Confirmed Attending</span></div>
-    <div class="stat"><b>${list.length-hadir}</b><span>Not Sure Yet</span></div>
-  `;
-  const tbody = document.querySelector('#admin-table tbody');
-  tbody.innerHTML = list.map(x=>`
-    <tr>
-      <td>${x.nama||'-'}</td>
-      <td>${x.konfirmasi||'-'}</td>
-      <td>${x.ukuran||'-'}${x.ukuran==='Custom' ? ` (Bust:${x.dada||'-'} Waist:${x.pinggang||'-'} Hips:${x.pinggul||'-'} Height:${x.tinggi||'-'})` : ''}</td>
-      <td>${x.hijab||'-'}</td>
-      <td>${x.catatan||'-'}</td>
-      <td>${x.ucapan||'-'}</td>
-    </tr>
-  `).join('');
-
-  document.getElementById('export-csv').addEventListener('click', ()=>{
-    const headers = ['Name','Status','Size','Bust/Chest','Waist','Hips','Height','Hijab','Notes','Message','Submitted At'];
-    const rows = list.map(x=>[x.nama,x.konfirmasi,x.ukuran,x.dada,x.pinggang,x.pinggul,x.tinggi,x.hijab,x.catatan,x.ucapan,x.waktu]);
-    let csv = headers.join(',') + '\n' + rows.map(r=> r.map(v=>`"${String(v||'').replace(/"/g,'""')}"`).join(',')).join('\n');
-    const blob = new Blob(["\uFEFF"+csv], {type:'text/csv;charset=utf-8;'});
-    const link = document.createElement('a');
-    link.href = URL.createObjectURL(blob);
-    link.download = 'bridesmaid-confirmations.csv';
-    link.click();
-  });
 })();
 
 /* ================= FALLING PETALS ================= */
