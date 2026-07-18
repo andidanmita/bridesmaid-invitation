@@ -592,6 +592,22 @@ form#rsvp-form{
 }
 #toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
 
+/* ===================== DECORATIVE ORNAMENTS ===================== */
+.head{position:relative;width:100%;}
+.ornament{
+  position:absolute;top:clamp(-38px,-6vh,-14px);width:clamp(44px,9vw,72px);height:auto;
+  pointer-events:none;opacity:.85;z-index:1;
+}
+.ornament.left{left:clamp(-8px,-2vw,10px);}
+.ornament.right{right:clamp(-8px,-2vw,10px);}
+#question .content{position:relative;width:100%;}
+#question .ornament{top:clamp(-72px,-11vh,-46px);}
+#thankyou .ornament.center{
+  position:relative;top:auto;left:auto;right:auto;margin:0 auto 14px;display:block;
+  width:clamp(70px,13vw,110px);
+}
+@media (max-width:560px){ .ornament{display:none !important;} }
+
 /* ===================== RESPONSIVE ===================== */
 @media (max-width:820px){
   #detail .wrap{grid-template-columns:1fr;gap:34px;}
