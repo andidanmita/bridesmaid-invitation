@@ -279,11 +279,6 @@ if(REDUCE_MOTION){
         const col = document.createElement('div');
         col.className = 'friend-col';
 
-        const label = document.createElement('div');
-        label.className = 'friend-col-name';
-        label.textContent = group.name;
-        col.appendChild(label);
-
         const imageCol = document.createElement('div');
         imageCol.className = 'image-column';
 
@@ -295,7 +290,12 @@ if(REDUCE_MOTION){
         // column still looks full when auto-scrolling, instead of looping
         // through a handful of images too quickly
         const MIN_PHOTOS_PER_COLUMN = 18;
+        const BASE_DURATION = 32; // seconds, at MIN_PHOTOS_PER_COLUMN — matches ISMA's speed
         const displayCount = Math.max(uniqueCount, MIN_PHOTOS_PER_COLUMN);
+        // longer tracks (more photos) get a proportionally longer duration
+        // so every column scrolls at the same px/sec speed, not just the
+        // same loop-cycle time
+        track.style.animationDuration = (BASE_DURATION * displayCount / MIN_PHOTOS_PER_COLUMN) + 's';
         for(let rep = 0; rep < 2; rep++){
           for(let pos = 0; pos < displayCount; pos++){
             const originalIndex = (pos + offset) % uniqueCount;
