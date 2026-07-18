@@ -694,7 +694,7 @@ document.getElementById('rsvp-form').addEventListener('submit', (e)=>{
   confettiBurst();
   showToast(existingRsvpId ? 'Your confirmation has been updated 💛' : 'Thank you! Your confirmation has been saved 💛');
   setTimeout(()=>{
-    scrollToSection('thankyou');
+    scrollToSection('wishes');
   }, 700);
 });
 
