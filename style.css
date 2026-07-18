@@ -605,6 +605,7 @@ form#rsvp-form{
   position:relative;top:auto;left:auto;right:auto;margin:0 auto 14px;display:block;
   width:clamp(70px,13vw,110px);
 }
+.ornament.center.bottom{margin:14px auto 0;}
 
 /* ===================== RESPONSIVE ===================== */
 @media (max-width:820px){
