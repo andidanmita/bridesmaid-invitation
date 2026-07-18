@@ -611,7 +611,15 @@ form#rsvp-form{
   position:relative;top:auto;left:auto;right:auto;margin:0 auto 14px;display:block;
   width:clamp(70px,13vw,110px);
 }
-@media (max-width:560px){ .ornament{display:none !important;} }
+@media (max-width:560px){
+  /* Journey/Friendship's desktop offsets are large fixed pixel minimums
+     tuned to sit close to wide headings — on a narrow phone that's more
+     than the available width, so it lands on top of the text. Smaller,
+     more viewport-relative values here instead. */
+  #journey .ornament, #friendship .ornament{width:34px;top:2px;}
+  #journey .ornament.left, #friendship .ornament.left{left:3vw;}
+  #journey .ornament.right, #friendship .ornament.right{right:3vw;}
+}
 
 /* ===================== RESPONSIVE ===================== */
 @media (max-width:820px){
