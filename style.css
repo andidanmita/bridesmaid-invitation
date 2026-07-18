@@ -418,7 +418,7 @@ h1.is-split,h2.is-split,
 
 /* ===================== FRIENDSHIP ===================== */
 #friendship{background:rgba(248,241,234,.9);padding:clamp(24px,6vh,80px) 0;flex-direction:column;overflow:hidden;}
-#friendship .head{text-align:center;max-width:600px;margin:0 auto clamp(16px,3.5vh,40px);padding:0 20px;}
+#friendship .head{text-align:center;max-width:600px;margin:0 auto clamp(8px,2vh,22px);padding:0 20px;}
 #friendship .eyebrow{color:var(--mahogany-600);}
 #friendship h2{font-size:clamp(1.4rem,3.6vw,2.4rem);color:var(--mahogany-950);margin:10px 0;}
 
