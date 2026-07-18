@@ -600,9 +600,14 @@ form#rsvp-form{
 }
 .ornament.left{left:clamp(-8px,-2vw,10px);}
 .ornament.right{right:clamp(-8px,-2vw,10px);}
+#journey .ornament{top:clamp(0px,1vh,16px);}
+#journey .ornament.left{left:clamp(90px,12vw,140px);}
+#journey .ornament.right{right:clamp(90px,12vw,140px);}
+#friendship .ornament{top:clamp(-14px,-1vh,6px);}
+#friendship .ornament.left{width:clamp(64px,13vw,105px);left:clamp(75px,10vw,110px);}
+#friendship .ornament.right{right:clamp(90px,11vw,130px);}
 #question .content{position:relative;width:100%;}
-#question .ornament{top:clamp(-72px,-11vh,-46px);}
-#thankyou .ornament.center{
+.ornament.center{
   position:relative;top:auto;left:auto;right:auto;margin:0 auto 14px;display:block;
   width:clamp(70px,13vw,110px);
 }
