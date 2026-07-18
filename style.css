@@ -234,16 +234,25 @@ h1.is-split,h2.is-split,
 }
 #loading .loadbar{
   width:140px;height:1px;background:rgba(251,245,236,.25);margin-top:16px;overflow:hidden;
+  position:relative;
 }
+/* indeterminate sliding bar while real assets are still loading — jumps
+   to a solid, fully-filled bar once #loading.ready lands (see script.js),
+   instead of a fixed-timer fill unrelated to actual load progress */
 #loading .loadbar span{
-  display:block;height:100%;width:0%;background:var(--gold);
-  animation:loadfill 2s var(--ease) forwards;
+  display:block;height:100%;width:35%;background:var(--gold);
+  animation:loadSlide 1.3s ease-in-out infinite;
 }
-@keyframes loadfill{to{width:100%;}}
-#loading .tap-hint{
-  color:var(--gold);opacity:0;margin-top:26px;
+@keyframes loadSlide{0%{margin-left:-35%;}100%{margin-left:100%;}}
+#loading.ready .loadbar span{animation:none;width:100%;margin-left:0;transition:width .5s ease;}
+#loading .loading-status{
+  color:var(--cream);opacity:.55;margin-top:26px;
   font-size:.66rem;letter-spacing:.3em;text-transform:uppercase;
-  transition:opacity .6s ease;
+}
+#loading.ready .loading-status{display:none;}
+#loading .tap-hint{
+  display:none;color:var(--gold);margin-top:26px;
+  font-size:.66rem;letter-spacing:.3em;text-transform:uppercase;
 }
 @keyframes pulseHint{0%,100%{opacity:.45}50%{opacity:1}}
 #loading.ready{cursor:pointer;}
@@ -251,7 +260,7 @@ h1.is-split,h2.is-split,
    (the .ready class is added in script.js on window load) — previously
    this text faded in on its own fixed timer, so it could invite a tap
    before the click handler was even attached yet */
-#loading.ready .tap-hint{opacity:1;animation:pulseHint 1.8s ease-in-out infinite;}
+#loading.ready .tap-hint{display:block;animation:pulseHint 1.8s ease-in-out infinite;}
 
 /* ===================== WELCOME ===================== */
 #welcome{
