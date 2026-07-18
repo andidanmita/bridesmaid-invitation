@@ -632,6 +632,8 @@ document.getElementById('rsvp-form').addEventListener('submit', (e)=>{
     }).catch(()=>{});
   }
 
+  if((data.ucapan || '').trim()) addWishCard(data, true);
+
   const waLines = [
     'Hi! I would like to confirm my attendance:',
     '',
@@ -659,45 +661,50 @@ function showToast(msg){
   setTimeout(()=> t.classList.remove('show'), 3200);
 }
 
-/* ================= WISHES WALL (reads the same Supabase table) ================= */
-(function(){
+/* ================= WISHES WALL (reads the same Supabase table) =================
+   addWishCard() is also called right after a form submit (see below) so a
+   guest's own wish appears immediately without waiting for a page reload. */
+function addWishCard(r, prepend){
   const list = document.getElementById('wishes-list');
+  if(!list) return;
   const empty = document.getElementById('wishes-empty');
-  if(!list || !SUPABASE_READY) return;
+  if(empty) empty.remove();
+
+  const isAttending = r.konfirmasi === 'Attending';
+  const card = document.createElement('div');
+  card.className = 'wish-card';
+
+  const top = document.createElement('div');
+  top.className = 'wish-top';
+  const name = document.createElement('div');
+  name.className = 'wish-name';
+  name.textContent = r.nama || 'Anonymous';
+  const badge = document.createElement('div');
+  badge.className = 'wish-badge ' + (isAttending ? 'attending' : 'maybe');
+  badge.textContent = isAttending ? 'Attending' : 'Not Sure Yet';
+  top.appendChild(name);
+  top.appendChild(badge);
+
+  const msg = document.createElement('div');
+  msg.className = 'wish-msg';
+  msg.textContent = r.ucapan;
+
+  card.appendChild(top);
+  card.appendChild(msg);
+  if(prepend && list.firstChild) list.insertBefore(card, list.firstChild);
+  else list.appendChild(card);
+  ScrollTrigger.refresh();
+}
+
+(function(){
+  if(!document.getElementById('wishes-list') || !SUPABASE_READY) return;
 
   fetch(SUPABASE_URL + '/rest/v1/rsvp?select=nama,konfirmasi,ucapan&order=id.desc', {
     headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': 'Bearer ' + SUPABASE_ANON_KEY }
   })
     .then(r => r.json())
     .then(rows => {
-      const wishes = rows.filter(r => (r.ucapan || '').trim());
-      if(!wishes.length) return; // keep the "be the first" empty state
-      empty.remove();
-      wishes.forEach(r => {
-        const isAttending = r.konfirmasi === 'Attending';
-        const card = document.createElement('div');
-        card.className = 'wish-card';
-
-        const top = document.createElement('div');
-        top.className = 'wish-top';
-        const name = document.createElement('div');
-        name.className = 'wish-name';
-        name.textContent = r.nama || 'Anonymous';
-        const badge = document.createElement('div');
-        badge.className = 'wish-badge ' + (isAttending ? 'attending' : 'maybe');
-        badge.textContent = isAttending ? 'Attending' : 'Not Sure Yet';
-        top.appendChild(name);
-        top.appendChild(badge);
-
-        const msg = document.createElement('div');
-        msg.className = 'wish-msg';
-        msg.textContent = r.ucapan;
-
-        card.appendChild(top);
-        card.appendChild(msg);
-        list.appendChild(card);
-      });
-      ScrollTrigger.refresh();
+      rows.filter(r => (r.ucapan || '').trim()).forEach(r => addWishCard(r));
     })
     .catch(err => console.error('Failed to load wishes', err));
 })();
