@@ -681,15 +681,27 @@ document.getElementById('rsvp-form').addEventListener('submit', (e)=>{
         body
       }).catch(()=>{});
     } else {
+      // return=representation so we learn the new row's real id — needed to
+      // update (not duplicate-insert) if this same guest submits again
+      // later in this same page session, before any reload
       fetch(SUPABASE_URL + '/rest/v1/rsvp', {
         method: 'POST',
-        headers: { ...SUPABASE_HEADERS, 'Prefer': 'return=minimal' },
+        headers: { ...SUPABASE_HEADERS, 'Prefer': 'return=representation' },
         body
-      }).catch(()=>{});
+      })
+        .then(r => r.json())
+        .then(rows => {
+          if(!rows[0]) return;
+          existingRsvpId = rows[0].id;
+          const list = document.getElementById('wishes-list');
+          const placeholderCard = list && list.querySelector('.wish-card[data-rsvp-id="' + data.id + '"]');
+          if(placeholderCard) placeholderCard.dataset.rsvpId = existingRsvpId;
+        })
+        .catch(()=>{});
     }
   }
 
-  if(!existingRsvpId && (data.ucapan || '').trim()) addWishCard(data, true);
+  upsertWishCard(existingRsvpId, data);
 
   confettiBurst();
   showToast(existingRsvpId ? 'Your confirmation has been updated 💛' : 'Thank you! Your confirmation has been saved 💛');
@@ -706,9 +718,10 @@ function showToast(msg){
 }
 
 /* ================= WISHES WALL (reads the same Supabase table) =================
-   addWishCard() is also called right after a form submit (see below) so a
-   guest's own wish appears immediately without waiting for a page reload. */
-function addWishCard(r, prepend){
+   upsertWishCard() is also called right after a form submit (see above) so a
+   guest's own wish appears/updates immediately without waiting for a page
+   reload — whether it's their first submission or an edit of a previous one. */
+function addWishCard(r, prepend, id){
   const list = document.getElementById('wishes-list');
   if(!list) return;
   const empty = document.getElementById('wishes-empty');
@@ -717,6 +730,7 @@ function addWishCard(r, prepend){
   const isAttending = r.konfirmasi === 'Attending';
   const card = document.createElement('div');
   card.className = 'wish-card';
+  if(id != null) card.dataset.rsvpId = id;
 
   const top = document.createElement('div');
   top.className = 'wish-top';
@@ -740,15 +754,39 @@ function addWishCard(r, prepend){
   ScrollTrigger.refresh();
 }
 
+/* id ties a rendered card back to its Supabase row (or, briefly, to the
+   local Date.now() placeholder used before an insert's real id comes back
+   — see the submit handler). Editing a row with an existing card updates
+   it in place and bumps it to the top; a wish that got cleared out removes
+   its card; anything else is treated as a fresh wish. */
+function upsertWishCard(id, r){
+  const hasMsg = (r.ucapan || '').trim();
+  const list = document.getElementById('wishes-list');
+  const existing = (id != null && list) ? list.querySelector('.wish-card[data-rsvp-id="' + id + '"]') : null;
+
+  if(existing){
+    if(!hasMsg){ existing.remove(); return; }
+    const isAttending = r.konfirmasi === 'Attending';
+    existing.querySelector('.wish-name').textContent = r.nama || 'Anonymous';
+    const badge = existing.querySelector('.wish-badge');
+    badge.className = 'wish-badge ' + (isAttending ? 'attending' : 'maybe');
+    badge.textContent = isAttending ? 'Attending' : 'Not Sure Yet';
+    existing.querySelector('.wish-msg').textContent = r.ucapan;
+    if(list.firstChild !== existing) list.insertBefore(existing, list.firstChild);
+    return;
+  }
+  if(hasMsg) addWishCard(r, true, id);
+}
+
 (function(){
   if(!document.getElementById('wishes-list') || !SUPABASE_READY) return;
 
-  fetch(SUPABASE_URL + '/rest/v1/rsvp?select=nama,konfirmasi,ucapan&order=id.desc', {
+  fetch(SUPABASE_URL + '/rest/v1/rsvp?select=id,nama,konfirmasi,ucapan&order=id.desc', {
     headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': 'Bearer ' + SUPABASE_ANON_KEY }
   })
     .then(r => r.json())
     .then(rows => {
-      rows.filter(r => (r.ucapan || '').trim()).forEach(r => addWishCard(r));
+      rows.filter(r => (r.ucapan || '').trim()).forEach(r => addWishCard(r, false, r.id));
     })
     .catch(err => console.error('Failed to load wishes', err));
 })();
