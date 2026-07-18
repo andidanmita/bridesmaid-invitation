@@ -290,7 +290,7 @@ h1.is-split,h2.is-split,
 #reveal .bg{
   position:absolute;inset:0;background-size:cover;background-position:center 15%;
   filter:brightness(.4);
-  transform:scale(1.12);
+  transform:scale(1);
 }
 #reveal .veil{position:absolute;inset:0;background:linear-gradient(160deg, rgba(42,21,18,.55), rgba(42,21,18,.88));}
 #reveal .content{position:relative;z-index:2;text-align:center;color:var(--ivory);padding:0 24px;max-width:680px;}

@@ -772,3 +772,19 @@ if(HAS_FINE_POINTER){
     });
   });
 }
+
+/* ================= REVEAL BACKGROUND SLOW ZOOM (bg2) =================
+   Same slow Ken Burns zoom as the Welcome background, but triggered by
+   scrolling into #reveal instead of the loading-screen tap, and it
+   replays every time the section is scrolled back into view. */
+(function(){
+  const bg = document.querySelector('#reveal .bg');
+  if(!bg) return;
+  ScrollTrigger.create({
+    trigger:'#reveal', scroller:scroller, start:'top 70%', end:'bottom 20%',
+    onEnter: ()=> gsap.to(bg, {scale:1.12, duration:9, ease:'power2.inOut', overwrite:true}),
+    onEnterBack: ()=> gsap.to(bg, {scale:1.12, duration:9, ease:'power2.inOut', overwrite:true}),
+    onLeave: ()=> gsap.set(bg, {scale:1}),
+    onLeaveBack: ()=> gsap.set(bg, {scale:1})
+  });
+})();
