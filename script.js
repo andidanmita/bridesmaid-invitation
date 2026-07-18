@@ -588,6 +588,12 @@ document.querySelectorAll('input[name=konfirmasi]').forEach(r=>{
   });
 });
 
+/* Google Sheet (via Apps Script Web App) backing the Wishes Wall — see
+   apps-script-rsvp.gs for the code to deploy. Until a real URL is pasted
+   here, submissions still save to localStorage/WhatsApp as before, they
+   just won't appear in the shared Wishes Wall for other guests. */
+const RSVP_SHEET_URL = 'PASTE_YOUR_APPS_SCRIPT_WEB_APP_URL_HERE';
+
 document.getElementById('rsvp-form').addEventListener('submit', (e)=>{
   e.preventDefault();
   const data = {
@@ -607,6 +613,15 @@ document.getElementById('rsvp-form').addEventListener('submit', (e)=>{
   const list = JSON.parse(localStorage.getItem('bridesmaid_rsvp') || '[]');
   list.push(data);
   localStorage.setItem('bridesmaid_rsvp', JSON.stringify(list));
+
+  if(RSVP_SHEET_URL.startsWith('http')){
+    fetch(RSVP_SHEET_URL, {
+      method: 'POST',
+      mode: 'no-cors',
+      headers: {'Content-Type':'text/plain'},
+      body: JSON.stringify(data)
+    }).catch(()=>{});
+  }
 
   const waLines = [
     'Hi! I would like to confirm my attendance:',
@@ -634,6 +649,47 @@ function showToast(msg){
   t.classList.add('show');
   setTimeout(()=> t.classList.remove('show'), 3200);
 }
+
+/* ================= WISHES WALL (reads the same Google Sheet) ================= */
+(function(){
+  const list = document.getElementById('wishes-list');
+  const empty = document.getElementById('wishes-empty');
+  if(!list || !RSVP_SHEET_URL.startsWith('http')) return;
+
+  fetch(RSVP_SHEET_URL)
+    .then(r => r.json())
+    .then(rows => {
+      const wishes = rows.filter(r => (r.ucapan || '').trim());
+      if(!wishes.length) return; // keep the "be the first" empty state
+      empty.remove();
+      wishes.reverse().forEach(r => {
+        const isAttending = r.konfirmasi === 'Attending';
+        const card = document.createElement('div');
+        card.className = 'wish-card';
+
+        const top = document.createElement('div');
+        top.className = 'wish-top';
+        const name = document.createElement('div');
+        name.className = 'wish-name';
+        name.textContent = r.nama || 'Anonymous';
+        const badge = document.createElement('div');
+        badge.className = 'wish-badge ' + (isAttending ? 'attending' : 'maybe');
+        badge.textContent = isAttending ? 'Attending' : 'Not Sure Yet';
+        top.appendChild(name);
+        top.appendChild(badge);
+
+        const msg = document.createElement('div');
+        msg.className = 'wish-msg';
+        msg.textContent = r.ucapan;
+
+        card.appendChild(top);
+        card.appendChild(msg);
+        list.appendChild(card);
+      });
+      ScrollTrigger.refresh();
+    })
+    .catch(err => console.error('Failed to load wishes', err));
+})();
 
 /* ================= ADMIN DASHBOARD (?admin=1) ================= */
 (function(){
