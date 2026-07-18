@@ -243,10 +243,15 @@ h1.is-split,h2.is-split,
 #loading .tap-hint{
   color:var(--gold);opacity:0;margin-top:26px;
   font-size:.66rem;letter-spacing:.3em;text-transform:uppercase;
-  animation:fadein .8s ease forwards 2s, pulseHint 1.8s ease-in-out 2s infinite;
+  transition:opacity .6s ease;
 }
 @keyframes pulseHint{0%,100%{opacity:.45}50%{opacity:1}}
 #loading.ready{cursor:pointer;}
+/* only reveal "Tap to begin" once the page has actually finished loading
+   (the .ready class is added in script.js on window load) — previously
+   this text faded in on its own fixed timer, so it could invite a tap
+   before the click handler was even attached yet */
+#loading.ready .tap-hint{opacity:1;animation:pulseHint 1.8s ease-in-out infinite;}
 
 /* ===================== WELCOME ===================== */
 #welcome{
@@ -320,6 +325,9 @@ h1.is-split,h2.is-split,
   display:grid;grid-template-columns:1fr 1.1fr;gap:clamp(16px,4vh,60px);align-items:center;
 }
 #detail .photo-col .arch-frame{width:clamp(120px,30vw,230px);max-height:clamp(140px,26vh,290px);aspect-ratio:3/4;margin:0 auto;box-shadow:var(--shadow);}
+@media (orientation:landscape){
+  #detail .photo-col .arch-frame{max-height:clamp(160px,40vh,260px);}
+}
 #detail .eyebrow{color:var(--mahogany-600);text-align:center;}
 #detail h2{
   text-align:center;font-size:clamp(1.4rem,3.6vw,2.4rem);color:var(--mahogany-950);
