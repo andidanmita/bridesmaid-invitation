@@ -103,7 +103,10 @@ function playOpening(){
   tl.add(()=>{ if(btn) btn.classList.add('in'); }, '+=.05');
 }
 
-/* ================= LOADING ================= */
+/* ================= LOADING =================
+   400ms buffer (not the old 2000ms) just lets the intro's own CSS timeline
+   (logo draw, letter fade) land cleanly — most of that has usually already
+   played out during the real load time itself, so this stays short. */
 window.addEventListener('load', ()=>{
   setTimeout(()=>{
     const loadingEl = document.getElementById('loading');
@@ -120,7 +123,7 @@ window.addEventListener('load', ()=>{
     };
     loadingEl.addEventListener('click', dismiss, {once:true});
     setTimeout(dismiss, 5000); // safety net in case the tap never happens
-  }, 2000);
+  }, 400);
 });
 
 /* lazy-loaded images can change document height after ScrollTrigger's
