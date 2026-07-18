@@ -592,8 +592,8 @@ document.querySelectorAll('input[name=konfirmasi]').forEach(r=>{
    table + policies to create. Until real values are pasted here,
    submissions still save to localStorage/WhatsApp as before, they just
    won't appear in the shared Wishes Wall for other guests. */
-const SUPABASE_URL = 'PASTE_YOUR_SUPABASE_PROJECT_URL_HERE';
-const SUPABASE_ANON_KEY = 'PASTE_YOUR_SUPABASE_ANON_KEY_HERE';
+const SUPABASE_URL = 'https://gxkbldbrsheuzqmxreyw.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imd4a2JsZGJyc2hldXpxbXhyZXl3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODQzNDUwNzcsImV4cCI6MjA5OTkyMTA3N30.UKPQY19XpLR3ClnnLdY1xwCZ3h9tXY_1j8WOWQFdEcI';
 const SUPABASE_READY = SUPABASE_URL.startsWith('http') && SUPABASE_ANON_KEY.length > 20;
 
 document.getElementById('rsvp-form').addEventListener('submit', (e)=>{
