@@ -574,14 +574,14 @@ form#rsvp-form{
 
 /* ===================== THANK YOU ===================== */
 #thankyou{background:rgba(251,245,236,.9);flex-direction:column;text-align:center;padding:clamp(20px,5vh,40px) 24px;}
-#thankyou .eyebrow{color:var(--mahogany-600);}
+#thankyou .eyebrow{color:var(--mahogany-600);margin-top:clamp(10px,2.2vh,24px);}
 #thankyou h2{font-size:clamp(1.7rem,5vw,3rem);color:var(--mahogany-950);margin:clamp(8px,1.8vh,14px) 0 clamp(8px,1.8vh,16px);}
 #thankyou p{font-family:'Cormorant Garamond',serif;font-style:italic;font-size:1.2rem;color:var(--mahogany-800);max-width:420px;margin:0 auto 8px;line-height:1.7;}
 #thankyou .datebox{
   margin-top:clamp(12px,2.8vh,26px);display:inline-block;padding:14px 30px;border:1px solid var(--gold);
   font-family:'Marcellus',serif;letter-spacing:.1em;color:var(--mahogany-950);
 }
-#thankyou .mono-small{margin-top:clamp(16px,4vh,40px);opacity:.5;font-size:1.6rem;font-family:'Cormorant Garamond',serif;font-style:italic;color:var(--mahogany-600);}
+#thankyou .mono-small{margin-top:clamp(10px,2.2vh,24px);opacity:.5;font-size:1.6rem;font-family:'Cormorant Garamond',serif;font-style:italic;color:var(--mahogany-600);}
 
 /* ===================== TOAST ===================== */
 #toast{
