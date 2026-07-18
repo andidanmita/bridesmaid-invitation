@@ -588,11 +588,13 @@ document.querySelectorAll('input[name=konfirmasi]').forEach(r=>{
   });
 });
 
-/* Google Sheet (via Apps Script Web App) backing the Wishes Wall — see
-   apps-script-rsvp.gs for the code to deploy. Until a real URL is pasted
-   here, submissions still save to localStorage/WhatsApp as before, they
-   just won't appear in the shared Wishes Wall for other guests. */
-const RSVP_SHEET_URL = 'PASTE_YOUR_APPS_SCRIPT_WEB_APP_URL_HERE';
+/* Supabase table backing the Wishes Wall — see supabase-setup.sql for the
+   table + policies to create. Until real values are pasted here,
+   submissions still save to localStorage/WhatsApp as before, they just
+   won't appear in the shared Wishes Wall for other guests. */
+const SUPABASE_URL = 'PASTE_YOUR_SUPABASE_PROJECT_URL_HERE';
+const SUPABASE_ANON_KEY = 'PASTE_YOUR_SUPABASE_ANON_KEY_HERE';
+const SUPABASE_READY = SUPABASE_URL.startsWith('http') && SUPABASE_ANON_KEY.length > 20;
 
 document.getElementById('rsvp-form').addEventListener('submit', (e)=>{
   e.preventDefault();
@@ -614,12 +616,19 @@ document.getElementById('rsvp-form').addEventListener('submit', (e)=>{
   list.push(data);
   localStorage.setItem('bridesmaid_rsvp', JSON.stringify(list));
 
-  if(RSVP_SHEET_URL.startsWith('http')){
-    fetch(RSVP_SHEET_URL, {
+  if(SUPABASE_READY){
+    fetch(SUPABASE_URL + '/rest/v1/rsvp', {
       method: 'POST',
-      mode: 'no-cors',
-      headers: {'Content-Type':'text/plain'},
-      body: JSON.stringify(data)
+      headers: {
+        'Content-Type': 'application/json',
+        'apikey': SUPABASE_ANON_KEY,
+        'Authorization': 'Bearer ' + SUPABASE_ANON_KEY,
+        'Prefer': 'return=minimal'
+      },
+      body: JSON.stringify({
+        nama: data.nama, konfirmasi: data.konfirmasi, ukuran: data.ukuran,
+        hijab: data.hijab, catatan: data.catatan, ucapan: data.ucapan
+      })
     }).catch(()=>{});
   }
 
@@ -650,19 +659,21 @@ function showToast(msg){
   setTimeout(()=> t.classList.remove('show'), 3200);
 }
 
-/* ================= WISHES WALL (reads the same Google Sheet) ================= */
+/* ================= WISHES WALL (reads the same Supabase table) ================= */
 (function(){
   const list = document.getElementById('wishes-list');
   const empty = document.getElementById('wishes-empty');
-  if(!list || !RSVP_SHEET_URL.startsWith('http')) return;
+  if(!list || !SUPABASE_READY) return;
 
-  fetch(RSVP_SHEET_URL)
+  fetch(SUPABASE_URL + '/rest/v1/rsvp?select=nama,konfirmasi,ucapan&order=id.desc', {
+    headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': 'Bearer ' + SUPABASE_ANON_KEY }
+  })
     .then(r => r.json())
     .then(rows => {
       const wishes = rows.filter(r => (r.ucapan || '').trim());
       if(!wishes.length) return; // keep the "be the first" empty state
       empty.remove();
-      wishes.reverse().forEach(r => {
+      wishes.forEach(r => {
         const isAttending = r.konfirmasi === 'Attending';
         const card = document.createElement('div');
         card.className = 'wish-card';
