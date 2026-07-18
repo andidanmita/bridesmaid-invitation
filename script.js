@@ -756,13 +756,19 @@ document.addEventListener('click', (e)=>{
   ripple.addEventListener('animationend', ()=> ripple.remove());
 });
 
-/* ================= PARALLAX ON BG PHOTOS ================= */
-['#welcome .bg','#reveal .bg'].forEach(sel=>{
-  const el = document.querySelector(sel);
-  if(!el) return;
-  el.parentElement.addEventListener('mousemove', (e)=>{
-    const x = (e.clientX / innerWidth - 0.5) * 18;
-    const y = (e.clientY / innerHeight - 0.5) * 18;
-    el.style.transform = `scale(1.12) translate(${x}px, ${y}px)`;
+/* ================= PARALLAX ON BG PHOTOS (mouse only — no touch) =================
+   Touchscreens fire a synthetic mousemove right after a tap, which used to
+   make these backgrounds visibly pan/jump on every tap. Restricted to real
+   mouse pointers so tapping never moves the photo at all. */
+const HAS_FINE_POINTER = window.matchMedia('(pointer: fine)').matches;
+if(HAS_FINE_POINTER){
+  ['#welcome .bg','#reveal .bg'].forEach(sel=>{
+    const el = document.querySelector(sel);
+    if(!el) return;
+    el.parentElement.addEventListener('mousemove', (e)=>{
+      const x = (e.clientX / innerWidth - 0.5) * 18;
+      const y = (e.clientY / innerHeight - 0.5) * 18;
+      el.style.transform = `scale(1.12) translate(${x}px, ${y}px)`;
+    });
   });
-});
+}
